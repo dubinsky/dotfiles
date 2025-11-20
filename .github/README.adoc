@@ -81,4 +81,4 @@ of doing that, but there are approaches that are not `yadm`-specific:
 
 I use `yadm bootstrap` to install things that I need:
 
-- Arch packages link:/.config/yadm/bootstrap.d/arch-packages.txt
+- Arch packages link:https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/arch-packages.txt
