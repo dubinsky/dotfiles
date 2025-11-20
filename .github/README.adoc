@@ -1,4 +1,12 @@
-== README
+= Notes on dotfiles in general and Omarchy-specific tweaks
+:toc:
+:toclevels: 4
+:toc: preamble
+:icons: font
+
+My notes on dotfiles in general and tweaks specific to https://omarchy.org/[Omarchy].
+
+== dotfiles
 
 === Motivation
 
@@ -31,15 +39,35 @@ I am going to go with `yadm` for now :)
 `yadm` arranges for the home directory to be the work tree of the dotfiles repository
 which it stores in `~/.local/share/yadm/repo.git`.
 
+== yadm
+
+=== Installation
+
+To install `yadm` on `Omarchy`:
+
+[source,shell]
+----
+$ sudo pacman -S yadm
+----
+
+=== bootstrap
+
+After checkout, `yadm` https://yadm.io/docs/bootstrap[runs]
+`~/.config/yadm/bootstrap` executable;
+I use a script copied from the `yadm` manual
+which runs all the executables in `~/.config/yadm/bootstrap.d`.
+
 === README
 
 There are https://github.com/yadm-dev/yadm/issues/93[ways] to add README
 to the `yadm` repository without polluting the home directory;
-I do not want to deal with `spare checkout`, so I just put `README.adoc` under `.github` ;)
+I do not want to deal with `sparse checkout`, so I just put `README.adoc` under `.github` ;)
 
 === Secrets
 
-I might store secrets in my `dotfiles` repository: Cloudflare API tokens, Google Cloud Platform Keys etc.; `yadm` provides https://yadm.io/docs/encryption#[its own way]
+If I decide to store secrets in my `dotfiles` repository
+(Cloudflare API tokens, Google Cloud Platform keys etc.),
+`yadm` provides https://yadm.io/docs/encryption#[its own way]
 of doing that, but there are approaches that are not `yadm`-specific:
 
 - https://github.com/AGWA/git-crypt[git-crypt]
@@ -48,3 +76,9 @@ of doing that, but there are approaches that are not `yadm`-specific:
 - https://github.com/getsops/sops[SOPS]
 
 `yadm` supports `transcrypt`  and `git-crypt` directly.
+
+== Omarchy
+
+I use `yadm bootstrap` to install things that I need:
+
+- Arch packages link:/.config/yadm/bootstrap.d/arch-packages.txt
