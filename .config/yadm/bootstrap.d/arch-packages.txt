@@ -1,0 +1,26 @@
+# firware upgrader
+fwupd
+# direnv
+direnv
+# Midnight Commander
+mc
+# `drill` DNS tool
+ldns
+# Yubikey support
+yubikey-personalization-gui
+yubikey-manager
+libfido2
+# ZSA keyboards support
+libusb
+webkit2gtk-4.1
+gtk3
+# rclone
+rclone
+# rsync
+rsync
+# syncthing
+syncthing
+# Calibre ebooks manager
+calibre
+# Logitech mice
+solaar

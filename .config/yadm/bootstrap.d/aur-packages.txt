@@ -1,0 +1,10 @@
+# GPG GUI
+gpgfrontend
+# Google Cloud
+google-cloud-cli
+# Research
+zotero
+# CPAP machine
+oscar
+# amateur radio
+chirp-next

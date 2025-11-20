@@ -1,0 +1,50 @@
+== README
+
+=== Motivation
+
+Around year 2000, I heard, saw, and - I vaguely recall - used myself
+a bare repository approach to store my configuration files.
+Since I change my desktop computer only every 6-7 years on the average,
+it did not make sense to formalize it.
+
+Now that I use https://dub.podval.org/notes/SystemAdministration/Omarchy.html[Omarchy]
+on both my https://dub.podval.org/notes/SystemAdministration/Desktop/Framework%20Laptop%2013.html[Framework laptop]
+and https://dub.podval.org/notes/SystemAdministration/Desktop/Desktop%202024.html[Desktop 2024],
+maybe it is time to try again ;)
+
+=== Approach
+
+The options I see are:
+
+- https://www.gnu.org/software/stow/[GNU stow];
+although recommended in the Omarchy Manual,
+its symlink-based approach does not appeal to me;
+- bare GIT repository:
+there are many https://www.atlassian.com/git/tutorials/dotfiles[guides],
+but I'd like something that helps with creating and maintaining the dotfiles repository;
+- https://yadm.io/[yadm] seems to be a thin enough wrapper around a GIT repository
+which does help with routine tasks;
+- https://www.chezmoi.io/[chezmoi] gets a lot of praise for better templating than `yadm`,
+but since I don't even understand what templating is, let alone need it,
+I am going to go with `yadm` for now :)
+
+`yadm` arranges for the home directory to be the work tree of the dotfiles repository
+which it stores in `~/.local/share/yadm/repo.git`.
+
+=== README
+
+There are https://github.com/yadm-dev/yadm/issues/93[ways] to add README
+to the `yadm` repository without polluting the home directory;
+I do not want to deal with `spare checkout`, so I just put `README.adoc` under `.github` ;)
+
+=== Secrets
+
+I might store secrets in my `dotfiles` repository: Cloudflare API tokens, Google Cloud Platform Keys etc.; `yadm` provides https://yadm.io/docs/encryption#[its own way]
+of doing that, but there are approaches that are not `yadm`-specific:
+
+- https://github.com/AGWA/git-crypt[git-crypt]
+- https://github.com/elasticdog/transcrypt[transcrypt]
+- https://github.com/sobolevn/git-secret[git-secret]
+- https://github.com/getsops/sops[SOPS]
+
+`yadm` supports `transcrypt`  and `git-crypt` directly.
