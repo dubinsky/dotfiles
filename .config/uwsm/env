@@ -11,4 +11,5 @@ source ~/.config/uwsm/default
 omarchy-cmd-present mise && eval "$(mise activate bash)"
 
 # SSH agent socket
+# System needs to be restarted for this to take effect
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"

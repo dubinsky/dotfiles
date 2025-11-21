@@ -6,10 +6,6 @@ direnv
 mc
 # `drill` DNS tool
 ldns
-# Yubikey support
-yubikey-personalization-gui
-yubikey-manager
-libfido2
 # ZSA keyboards support
 libusb
 webkit2gtk-4.1

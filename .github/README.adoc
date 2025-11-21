@@ -24,7 +24,7 @@ maybe it is time to try again ;)
 
 The options I see are:
 
-- https://www.gnu.org/software/stow/[GNU stow];
+- https://www.gnu.org/software/stow/[GNU stow]:
 although recommended in the Omarchy Manual,
 its symlink-based approach does not appeal to me;
 - bare GIT repository:
@@ -54,8 +54,9 @@ $ sudo pacman -S yadm
 
 After checkout, `yadm` https://yadm.io/docs/bootstrap[runs]
 `~/.config/yadm/bootstrap` executable;
+it can also be run explicitly: `yadm bootstrap`.
 I use a https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap[script] copied from the `yadm` manual
-which runs all the executables in `~/.config/yadm/bootstrap.d`.
+which runs all the executables in `~/.config/yadm/bootstrap.d/`.
 
 === README
 
@@ -89,26 +90,49 @@ https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/instal
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/aur-packages.txt[AUR]
 https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-aur-packages.sh[packages];
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-java.sh[Java];
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/java.sh[Java];
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-pulumi.sh[Pulumi and Besom];
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[Yubikey];
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-asciidoctor.sh[Asciidoctor];
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/pulumi.sh[Pulumi and Besom];
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-bitwarden.sh[Bitwarden to replace 1Password];
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[Asciidoctor];
+
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[Bitwarden to replace 1Password];
 
 === Network
-By default, Omarchy uses DNS servers provided by DHCP; if not:
-`Omarchy | Setup | DNS`: use DHCP
+By default, `Omarchy` uses DNS servers provided by DHCP; if not:
+`Omarchy | Setup | DNS`: use DHCP.
 
-To use search domain provided by DHCP,
-in `/etc/systemd/network/20-ethernet.network` and `/etc/systemd/network/20-wlan.network` add:
+IMPORTANT: By default, search domain provided by DHCP is *not* used;
+to configure it, in `/etc/systemd/network/20-ethernet.network` and `/etc/systemd/network/20-wlan.network` add:
 
 [source]
 ----
 [Network]
 UseDomains=yes
 ----
+
+=== Configuration
+
+- `direnv` hooked into the shell:
+https://github.com/dubinsky/dotfiles/tree/master/.bashrc[~/.bashrc];
+
+- `direnv` status in the prompt: https://github.com/dubinsky/dotfiles/tree/master/.config/starship.toml[~/.config/starship.toml];
+
+- `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[~/.config/uwsm/env];
+
+- `Bitwarden` keyboard binding (replaces `1Password`):
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
+
+- `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile];
+
+=== Chromium
+
+To be able to log into Google account and synchronize bookmarks etc., run:
+`Omarchy | Install | Service | Chromium Account`
+
+TODO what theme should I use to be able to change font size?
 
 === Firmware
 
@@ -118,55 +142,7 @@ $ fwupdmgr refresh
 $ sudo fwupdmgr update
 ----
 
-=== DirEnv
-To https://direnv.net/docs/hook.html[hook direnv into the shell],
-add the following line at the *end* of the `~/.bashrc` file:
-
-[source,shell]
-----
-eval "$(direnv hook bash)"
-----
-
-To add `direnv` status to the prompt, in `~/.config/starship.toml` add:
-
-[source,toml]
-----
-[direnv]
-disabled = false
-format = "[$symbol$allowed]($style)"
-symbol = "e"
-allowed_msg = ""
-not_allowed_msg = "✗"
-----
-and set:
-
-[source,toml]
-----
-format = "[$directory$git_branch$git_status]($style)$direnv$character"
-----
-
-=== Chromium
-
-To be able to log into Google account and synchronize bookmarks etc., run:
-`Omarchy | Install | Service | Chromium Account`
-
-TODO what theme should I use to be able to change font size?
-
 === Yubikey
-Enable SSH agent:
-
-[source,shell]
-----
-$ systemctl enable --now --user ssh-agent.service
-----
-
-In `~/.config/uwsm/env`, add:
-
-[source,shell]
-----
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-----
-Restart the system.
 
 [source,shell]
 ----
@@ -202,15 +178,6 @@ $ hyprctl monitors all
 Follow https://github.com/zsa/wally/wiki/Linux-install[Keymapp installation] instructions:
 
 Download https://oryx.nyc3.cdn.digitaloceanspaces.com/keymapp/keymapp-latest.tar.gz[latest Keymapp] and unpack it into `~/.local/share/Keymapp`.
-
-Add to `~/.bash_profile`:
-
-[source,shell]
-----
-# Keymapp
-export PATH="$PATH:/home/dub/.local/share/Keymapp"
-----
-Log out and back in for the `PATH` to change :)
 
 Create `/etc/udev/rules.d/50-zsa.rules` with:
 
@@ -403,16 +370,5 @@ source = ~/.config/hypr/jetbrains.conf
 Note: since Omarchy itself ships some windows rules in `~.local/share/omarchy/default/hypr/apps/jetbrains.conf`, it is not clear which (if any) of the above rules are actually needed, nor if the Omarchy-supplied rules need to be disabled...
 
 === Bitwarden
-
-Change keyboard binding from `1Password` to `Bitwarden` in
-`~/.config/hypr/bindings.conf`:
-
-[source,properties]
-----
-# from:
-bindd = SUPER SHIFT, SLASH, Passwords, exec, uwsm-app -- 1password
-# to:
-bindd = SUPER SHIFT, SLASH, Passwords, exec, uwsm-app -- bitwarden-desktop
-----
 
 TODO there does not seem any way to configure the font!

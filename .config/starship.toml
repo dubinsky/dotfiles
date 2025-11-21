@@ -1,5 +1,6 @@
 add_newline = true
 command_timeout = 200
+# add `direnv` status to the prompt
 format = "[$directory$git_branch$git_status]($style)$direnv$character"
 
 [character]
@@ -31,6 +32,7 @@ staged     = ""
 renamed    = ""
 deleted    = ""
 
+# configure `direnv`
 [direnv]
 disabled = false
 format = "[$symbol$allowed]($style)"
