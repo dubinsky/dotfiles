@@ -151,7 +151,8 @@ To be able to log into Google account and synchronize bookmarks etc., run:
 `Omarchy | Install | Service | Chromium Account`
 
 TODO what theme should I use to be able to change font size?
-## Yubikey
+
+=== Yubikey
 Enable SSH agent:
 
 [source,shell]
@@ -237,7 +238,8 @@ $ sudo udevadm trigger
 Log out and back in for the group to apply :)
 
 TODO add desktop entry and/or key binding for keymapp...
-## Fonts
+
+=== Fonts
 
 There is a TUI for changing the terminal font, but not for changing font size.
 
