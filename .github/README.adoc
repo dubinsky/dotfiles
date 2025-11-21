@@ -84,10 +84,10 @@ of doing that, but there are approaches that are not `yadm`-specific:
 I use `yadm bootstrap` to install things that I need:
 
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/arch-packages.txt[Arch]
-https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-arch-packages.txt[packages];
+https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-arch-packages.sh[packages];
 
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/aur-packages.txt[AUR]
-https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-aur-packages.txt[packages];
+https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-aur-packages.sh[packages];
 
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-java.sh[Java];
 
