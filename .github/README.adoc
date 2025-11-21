@@ -124,10 +124,13 @@ https://github.com/dubinsky/dotfiles/tree/master/.bashrc[~/.bashrc];
 
 - `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[~/.config/uwsm/env];
 
+- `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile];
+
 - `Bitwarden` keyboard binding (replaces `1Password`):
 https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
 
-- `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile];
+- `IntelliJ` keyboard binding:
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
 
 === Chromium
 
@@ -135,24 +138,6 @@ To be able to log into Google account and synchronize bookmarks etc., run:
 `Omarchy | Install | Service | Chromium Account`
 
 TODO what theme should I use to be able to change font size?
-
-=== Firmware
-
-[source,shell]
-----
-$ fwupdmgr refresh
-$ sudo fwupdmgr update
-----
-
-=== Yubikey
-
-[source,shell]
-----
-# To add Yubikey credentials to SSH:
-$ ssh-add -K
-# To list credentials added to the agent:
-$ ssh-add -L
-----
 
 === Monitors
 Omarchy https://learn.omacom.io/2/the-omarchy-manual/86/monitors[manual]
@@ -177,6 +162,9 @@ $ hyprctl monitors all
 ----
 
 === ZSA Moonlander Keyboard
+
+TODO move into the script!!!
+
 Create `/etc/udev/rules.d/50-zsa.rules` with:
 
 [source]
@@ -319,13 +307,6 @@ JetBrains IDEs are available from AUR, but the best way to install and update th
 JetBrains IDEs now support Wayland natively, but it is not enabled by default; to https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on-off-native-Wayland-mode[turn it on]:
 select `Help | Edit custom VM options` and add `-Dawt.toolkit.name=WLToolkit`.
 
-I added a keyboard binding for the IDE in `~/.config/hypr/bindings.conf`:
-
-[source]
-----
-bindd = SUPER SHIFT, J, IntelliJ Idea, exec, omarchy-launch-or-focus "^idea$" idea
-----
-
 When JetBrains IDEs are running on Wayland, their pop-ups are do not get focused, so pop-up where the IDE asks if you trust a project you are trying to open for a first time is not visible and there is no way to say "yes" (or even see the pop-up window) :(
 
 To fix this, windows rules https://github.com/basecamp/omarchy/discussions/100[need] to be https://notes.dsebastien.net/30+Areas/33+Permanent+notes/33.02+Content/How+to+install+IntelliJ+IDEA+on+Omarchy[added].
@@ -370,3 +351,24 @@ Note: since Omarchy itself ships some windows rules in `~.local/share/omarchy/de
 === Bitwarden
 
 TODO there does not seem any way to configure the font!
+
+
+=== Tips
+
+==== Firmware
+
+[source,shell]
+----
+$ fwupdmgr refresh
+$ sudo fwupdmgr update
+----
+
+==== Yubikey
+
+[source,shell]
+----
+# To add Yubikey credentials to SSH:
+$ ssh-add -K
+# To list credentials added to the agent:
+$ ssh-add -L
+----
