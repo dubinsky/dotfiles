@@ -80,7 +80,7 @@ of doing that, but there are approaches that are not `yadm`-specific:
 
 == Omarchy
 
-=== Packages
+=== Bootstrap
 
 I use `yadm bootstrap` to install things that I need:
 
@@ -99,6 +99,8 @@ https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/instal
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[Asciidoctor];
 
 - https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[Bitwarden to replace 1Password];
+
+- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/keyboards.sh[ZSA keyboards];
 
 === Network
 By default, `Omarchy` uses DNS servers provided by DHCP; if not:
@@ -175,10 +177,6 @@ $ hyprctl monitors all
 ----
 
 === ZSA Moonlander Keyboard
-Follow https://github.com/zsa/wally/wiki/Linux-install[Keymapp installation] instructions:
-
-Download https://oryx.nyc3.cdn.digitaloceanspaces.com/keymapp/keymapp-latest.tar.gz[latest Keymapp] and unpack it into `~/.local/share/Keymapp`.
-
 Create `/etc/udev/rules.d/50-zsa.rules` with:
 
 [source]

@@ -1,4 +1,4 @@
-# firware upgrader
+# firmware upgrader
 fwupd
 # direnv
 direnv
@@ -6,10 +6,6 @@ direnv
 mc
 # `drill` DNS tool
 ldns
-# ZSA keyboards support
-libusb
-webkit2gtk-4.1
-gtk3
 # rclone
 rclone
 # rsync
