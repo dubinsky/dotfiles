@@ -216,9 +216,13 @@ https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.c
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/books.sh[~/.config/yadm/bootstrap.d/books.sh]
 
+- syncthing: https://github.com/dubinsky/dotfiles/tree/master/.config/syncthing/config.xml[~/.config/syncthing/config.xml]
+
 === Health
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/health.sh[~/.config/yadm/bootstrap.d/health.sh]
+
+- OSCAR: https://github.com/dubinsky/dotfiles/tree/master/.config/OSCAR_Team/OSCAR.conf[~/.config/OSCAR_Team/OSCAR.conf]
 
 === Radio
 
