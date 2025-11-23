@@ -19,6 +19,8 @@
     "format": "{}",
     "format-en": "US",
     "format-ru": "RU",
+    // To determine keyboard device name: `$ hyprctl devices`;
+    // `<keyboard-device-name>` can also be `current` or `all`.
     "on-click": "hyprctl switchxkblayout all next"
   },
   "hyprland/workspaces": {

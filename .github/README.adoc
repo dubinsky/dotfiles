@@ -80,28 +80,21 @@ of doing that, but there are approaches that are not `yadm`-specific:
 
 == Omarchy
 
-=== Bootstrap
+Bootstrap, configuration, and manual tweaks to set up Omarchy.
 
-I use `yadm bootstrap` to install things that I need:
+=== Midnight Commander
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/aur-packages.txt[AUR]
-https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/install-aur-packages.sh[packages];
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[~/.config/yadm/bootstrap.d/mc.sh]
+- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/java.sh[Java];
+=== DNS
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[Yubikey];
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/dns.sh[~/.config/yadm/bootstrap.d/dns.sh]
 
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/pulumi.sh[Pulumi and Besom];
-
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[Asciidoctor];
-
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[Bitwarden to replace 1Password];
-
-- https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/keyboards.sh[ZSA keyboards];
-
-=== Network
 By default, `Omarchy` uses DNS servers provided by DHCP; if not:
 `Omarchy | Setup | DNS`: use DHCP.
+
+TODO automate!!!
 
 IMPORTANT: By default, search domain provided by DHCP is *not* used;
 to configure it, in `/etc/systemd/network/20-ethernet.network` and `/etc/systemd/network/20-wlan.network` add:
@@ -112,133 +105,132 @@ to configure it, in `/etc/systemd/network/20-ethernet.network` and `/etc/systemd
 UseDomains=yes
 ----
 
-=== Configuration
+=== Monitors
 
-- `direnv` hooked into the shell:
-https://github.com/dubinsky/dotfiles/tree/master/.bashrc[~/.bashrc];
+- https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/monitors.conf[~/.config/hypr/monitors.conf]
 
-- `direnv` status in the prompt: https://github.com/dubinsky/dotfiles/tree/master/.config/starship.toml[~/.config/starship.toml];
+=== Fonts
+- `Hyprland`: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/looknfeel.conf[~/.config/hypr/looknfeel.conf]
+- `Ghostty`:  https://github.com/dubinsky/dotfiles/tree/master/.config/ghosttty/config[~/.config/ghosttty/config`]
+- `Alacritty`: https://github.com/dubinsky/dotfiles/tree/master/.config/alacritty/alacritty.toml[~/.config/alacritty/alacritty.toml]
 
-- `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[~/.config/uwsm/env];
+=== Keyboards
+
+- keyboard layouts: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/input.conf[~/.config/hypr/input.conf]
+- keyboard layout indicator: https://github.com/dubinsky/dotfiles/tree/master/.config/waybar/config.jsonc[~/.config/waybar/config.jsonc]
+- keyboard layout indicator styling and font size: https://github.com/dubinsky/dotfiles/tree/master/.config/waybar/style.css[~/.config/waybar/style.css]
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/keyboards.sh[~/.config/yadm/bootstrap.d/keyboards.sh]
+
+- udev rules: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/50-zsa.rules[~/.config/yadm/bootstrap.d/50-zsa.rules]
 
 - `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile];
 
-- `Bitwarden` keyboard binding (replaces `1Password`):
+- TODO add desktop entry and/or key binding for keymapp...
+
+=== Mice
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mice.sh[~/.config/yadm/bootstrap.d/mice.sh]
+
+=== DirEnv
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/direnv.sh[~/.config/yadm/bootstrap.d/direnv.sh]
+
+- hook into the shell:
+https://github.com/dubinsky/dotfiles/tree/master/.bashrc[~/.bashrc];
+
+- status in the prompt: https://github.com/dubinsky/dotfiles/tree/master/.config/starship.toml[~/.config/starship.toml];
+
+=== Synchronization and Backup
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/syncs.sh[~/.config/yadm/bootstrap.d/syncs.sh]
+
+=== Firmware
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/firmware.sh[~/.config/yadm/bootstrap.d/firmware.sh]
+
+=== BitWarden
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[~/.config/yadm/bootstrap.d/bitwarden.sh]
+
+- keyboard binding (replaces `1Password`):
 https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
 
+=== Yubikey
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[~/.config/yadm/bootstrap.d/yubikey.sh]
+
+- `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[~/.config/uwsm/env];
+
+=== Java
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/java.sh[~/.config/yadm/bootstrap.d/java.sh]
+
+- https://github.com/dubinsky/dotfiles/tree/master/.gradle/gradle.properties[~/.gradle/gradle.properties]
+
+=== JetBrains
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/jetbrains.sh[~/.config/yadm/bootstrap.d/jetbrains.sh]
+
+- `JetBrains Toolbox` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile]
+
 - `IntelliJ` keyboard binding:
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf]
+
+- windows rules: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/jetbrains.conf[~/.config/hypr/jetbrains.conf],
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/hyprland.conf[~/.config/hypr/hyprland.conf]
+
+- manual: enable native Wayland support:
+select `Help | Edit custom VM options` and add `-Dawt.toolkit.name=WLToolkit`;
+see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on-off-native-Wayland-mode
+
+=== Pulumi and Besom
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/pulumi.sh[~/.config/yadm/bootstrap.d/pulumi.sh]
+
+=== Google Cloud
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/google-cloud.sh[~/.config/yadm/bootstrap.d/google-cloud.sh]
+
+=== Obsidian
+- manual: enable community plugins;
+- manual: set theme to `Omarchy` so that Obsidian follows theme changes; this theme becomes available in an Obsidian vault only after Omarchy theme was changed at least once after Obsidian vault was opened.
+- manual: to increase font size of both the user interface that the editor, set
+`Settings | Appearance | Advanced | Zoom level` to 150% and
+`Settings | Appearance | Font size` to 16.
 
 === Chromium
 
-To be able to log into Google account and synchronize bookmarks etc., run:
-`Omarchy | Install | Service | Chromium Account`
+- ability to log into Google account and synchronize bookmarks etc.:
+~/.config/chromium-flags.conf
+(manual: `Omarchy | Install | Service | Chromium Account`);
+- manual: TODO what theme should I use to be able to change font size?
 
-TODO what theme should I use to be able to change font size?
+=== GPG
 
-=== Monitors
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/gpg.sh[~/.config/yadm/bootstrap.d/gpg.sh]
 
+=== GIT
+- https://github.com/dubinsky/dotfiles/tree/master/.config/git/config[~/.config/git/config]
 
-=== ZSA Moonlander Keyboard
+=== Organizations
 
-TODO add desktop entry and/or key binding for keymapp...
+- https://github.com/dubinsky/dotfiles/tree/master/Projects/.envrc[~/Projects/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/.gitconfig]
+- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/CognoMath/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/CognoMath/.gitconfig]
+- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/OpenTorah/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/OpenTorah/.gitconfig]
 
-=== Fonts
+=== Books
 
-There is a TUI for changing the terminal font, but not for changing font size.
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[~/.config/yadm/bootstrap.d/asciidoctor.sh]
 
-Terminal font for `Ghosttty`:  `~/.config/ghosttty/config`.
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/books.sh[~/.config/yadm/bootstrap.d/books.sh]
 
-Terminal font for  `Alacritty`: `~/.config/alacritty/alacritty.toml`.
+=== Health
 
-Top bar (`Waybar`) font: `~/.config/waybar/style.css`.
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/health.sh[~/.config/yadm/bootstrap.d/health.sh]
 
-Obsidian: there does not seem any way to configure the font!
+=== Radio
 
-
-=== Obsidian
-Enable community plugins.
-
-For Obsidian to follow theme changes, its theme needs to be manually set to `Omarchy`; this theme becomes available in an Obsidian vault only after Omarchy theme was changed at least once after Obsidian vault was opened.
-
-To increase font size of both the user interface that the editor, I set `Settings | Appearance | Advanced | Zoom level` to 150%a and `Settings | Appearance | Font size` to 16.
-
-=== Keyboard Layouts
-https://learn.omacom.io/2/the-omarchy-manual/78/keyboard-mouse-trackpad[Omarchy Manual] explains that keyboard layout can be added in `~/.config/hypr/input.conf`:
-
-[source]
-----
-input {
-  # Use multiple keyboard layouts and switch between them with Left Alt + Right Alt
-  kb_layout = us,ru(phonetic)
-  kb_options = compose:caps,grp:alts_toggle
-----
-
-To list available keyboard layouts:
-
-[source,shell]
-----
-$ localectl list-keymaps
-----
-
-The list of available toggles:
-
-[source,shell]
-----
-$ grep -hroE 'grp:.*toggle ' /usr/share/X11/xkb/rules/ | sort -u
-----
-Omarchy Manual also https://learn.omacom.io/2/the-omarchy-manual/67/faq[points]
-to https://github.com/basecamp/omarchy/discussions/111[instructions]
-on how to add layout indicator and selector to the top bar
-in `~/.config/waybar/config.jsonc`:
-
-[source,json]
-----
-"modules-right": [
-  "hyprland/language",
-],
-"hyprland/language": {
-  "format": "{}",
-  "format-en": "US",
-  "format-ru": "RU",
-  "on-click": "hyprctl switchxkblayout <keyboard-device-name> next"
-}
-----
-
-Keyboard device name can be determined by:
-
-[source,shell]
-----
-$ hyprctl devices
-----
-
-`<keyboard-device-name>` can also be `current` or `all`.
-
-Styling of the above is configured in
-`~/.config/waybar/style.css`:
-
-[source,css]
-----
-#language {
-  min-width: 12px;
-  margin: 0 7.5px;
-}
-----
-
-To restart Waybar:
-
-[source,shell]
-----
-$ pkill waybar && hyprctl dispatch exec waybar
-----
-
-=== JetBrains
-
-JetBrains IDEs now support Wayland natively, but it is not enabled by default; to https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on-off-native-Wayland-mode[turn it on]:
-select `Help | Edit custom VM options` and add `-Dawt.toolkit.name=WLToolkit`.
-
-
-`~/.config/hypr/jetbrains.conf`
-
-
-`~/.config/hypr/hyprland.conf`: include `~/.config/hypr/jetbrains.conf`
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/radio.sh[~/.config/yadm/bootstrap.d/radio.sh]
