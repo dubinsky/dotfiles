@@ -82,9 +82,17 @@ of doing that, but there are approaches that are not `yadm`-specific:
 
 Bootstrap, configuration, and manual tweaks to set up Omarchy.
 
+=== Updates
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/00-updates.sh[~/.config/yadm/bootstrap.d/00-updates.sh]
+
 === DNS
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/dns.sh[~/.config/yadm/bootstrap.d/dns.sh]
+
+- UseDomains drop-in: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/systemd/network.conf.d/80-UseDomains.conf[~/.config/yadm/etc/systemd/network.conf.d/80-UseDomains.conf]
+
+- /etc/hosts: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/hosts[~/.config/yadm/etc/hosts]
 
 === Monitors
 
@@ -103,7 +111,7 @@ Bootstrap, configuration, and manual tweaks to set up Omarchy.
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/keyboards.sh[~/.config/yadm/bootstrap.d/keyboards.sh]
 
-- udev rules: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/50-zsa.rules[~/.config/yadm/bootstrap.d/50-zsa.rules]
+- udev rules: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/udev/rules.d/50-zsa.rules[~/.config/yadm/etc/udev/rules.d/50-zsa.rules]
 
 - `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[~/.bash_profile];
 
@@ -122,32 +130,32 @@ https://github.com/dubinsky/dotfiles/tree/master/.bashrc[~/.bashrc];
 
 - status in the prompt: https://github.com/dubinsky/dotfiles/tree/master/.config/starship.toml[~/.config/starship.toml];
 
-=== Synchronization and Backup
+=== SSH
 
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/syncs.sh[~/.config/yadm/bootstrap.d/syncs.sh]
-
-=== Firmware
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/firmware.sh[~/.config/yadm/bootstrap.d/firmware.sh]
-
-=== BitWarden
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[~/.config/yadm/bootstrap.d/bitwarden.sh]
-
-- keyboard binding (replaces `1Password`):
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
-
-=== Yubikey
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[~/.config/yadm/bootstrap.d/yubikey.sh]
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[~/.config/yadm/bootstrap.d/ssh.sh]
 
 - `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[~/.config/uwsm/env];
+
+- `SSH` configuration: https://github.com/dubinsky/dotfiles/tree/master/.ssh/config[~/.ssh/config];
+
+- `SSH` authorized keys: https://github.com/dubinsky/dotfiles/tree/master/.ssh/authorized_keys[~/.ssh/authorized_keys];
 
 === Java
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/java.sh[~/.config/yadm/bootstrap.d/java.sh]
 
 - https://github.com/dubinsky/dotfiles/tree/master/.gradle/gradle.properties[~/.gradle/gradle.properties]
+
+- https://github.com/dubinsky/dotfiles/tree/master/.config/git/config[~/.config/git/config]
+
+=== Organizations
+
+- https://github.com/dubinsky/dotfiles/tree/master/Projects/.envrc[~/Projects/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/.gitconfig]
+- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/CognoMath/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/CognoMath/.gitconfig]
+- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/OpenTorah/.envrc]
+- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/OpenTorah/.gitconfig]
 
 === JetBrains
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/jetbrains.sh[~/.config/yadm/bootstrap.d/jetbrains.sh]
@@ -168,9 +176,18 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/pulumi.sh[~/.config/yadm/bootstrap.d/pulumi.sh]
 
+=== Synchronization and Backup
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/syncs.sh[~/.config/yadm/bootstrap.d/syncs.sh]
+
 === Google Cloud
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/google-cloud.sh[~/.config/yadm/bootstrap.d/google-cloud.sh]
+
+=== Midnight Commander
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[~/.config/yadm/bootstrap.d/mc.sh]
+- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
 
 === Obsidian
 - manual: enable community plugins;
@@ -186,22 +203,12 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 (manual: `Omarchy | Install | Service | Chromium Account`);
 - manual: TODO what theme should I use to be able to change font size?
 
-=== GIT
-- https://github.com/dubinsky/dotfiles/tree/master/.config/git/config[~/.config/git/config]
+=== BitWarden
 
-=== Organizations
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[~/.config/yadm/bootstrap.d/bitwarden.sh]
 
-- https://github.com/dubinsky/dotfiles/tree/master/Projects/.envrc[~/Projects/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/.gitconfig]
-- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/CognoMath/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/CognoMath/.gitconfig]
-- https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/OpenTorah/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/OpenTorah/.gitconfig]
-
-=== Midnight Commander
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[~/.config/yadm/bootstrap.d/mc.sh]
-- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
+- keyboard binding (replaces `1Password`):
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
 
 === Books
 

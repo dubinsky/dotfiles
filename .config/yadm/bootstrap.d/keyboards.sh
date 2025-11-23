@@ -17,7 +17,7 @@ RULES="/etc/udev/rules.d/"
 if [ ! -f "$RULES/50-zsa.rules" ]; then
   echo "Installing ZSA udev rules"
   sudo mkdir -p $RULES
-  sudo cp "./$RULES/50-zsa.rules" $RULES
+  sudo cp "$HOME/.config/yadm/$RULES/50-zsa.rules" $RULES
   sudo groupadd plugdev
   sudo usermod -aG plugdev $USER
   sudo udevadm control --reload

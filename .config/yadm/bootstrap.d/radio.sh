@@ -1,3 +1,5 @@
 #!/bin/bash
 
-yay -S --needed chirp-next
+sudo pacman -S --needed gqrx
+
+yay -S --needed chirp-next sdrpp-git sdrsharp
