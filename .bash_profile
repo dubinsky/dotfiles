@@ -7,7 +7,7 @@
 # For PATH changes to take effect, re-log in.
 
 # JetBrains Toolbox
-export PATH="$PATH:/home/dub/.local/share/JetBrains/Toolbox/scripts"
+export PATH="$PATH:$HOME/.local/share/JetBrains/Toolbox/scripts"
 
 # Keymapp
-export PATH="$PATH:/home/dub/.local/share/Keymapp"
+export PATH="$PATH:$HOME/.local/share/keymapp/bin"
