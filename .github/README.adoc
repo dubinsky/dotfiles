@@ -82,28 +82,9 @@ of doing that, but there are approaches that are not `yadm`-specific:
 
 Bootstrap, configuration, and manual tweaks to set up Omarchy.
 
-=== Midnight Commander
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[~/.config/yadm/bootstrap.d/mc.sh]
-- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
-
 === DNS
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/dns.sh[~/.config/yadm/bootstrap.d/dns.sh]
-
-By default, `Omarchy` uses DNS servers provided by DHCP; if not:
-`Omarchy | Setup | DNS`: use DHCP.
-
-TODO automate!!!
-
-IMPORTANT: By default, search domain provided by DHCP is *not* used;
-to configure it, in `/etc/systemd/network/20-ethernet.network` and `/etc/systemd/network/20-wlan.network` add:
-
-[source]
-----
-[Network]
-UseDomains=yes
-----
 
 === Monitors
 
@@ -205,10 +186,6 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 (manual: `Omarchy | Install | Service | Chromium Account`);
 - manual: TODO what theme should I use to be able to change font size?
 
-=== GPG
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/gpg.sh[~/.config/yadm/bootstrap.d/gpg.sh]
-
 === GIT
 - https://github.com/dubinsky/dotfiles/tree/master/.config/git/config[~/.config/git/config]
 
@@ -220,6 +197,11 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 - https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/CognoMath/.gitconfig]
 - https://github.com/dubinsky/dotfiles/tree/master/.envrc[~/OpenTorah/.envrc]
 - https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[~/OpenTorah/.gitconfig]
+
+=== Midnight Commander
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[~/.config/yadm/bootstrap.d/mc.sh]
+- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
 
 === Books
 
@@ -234,3 +216,7 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 === Radio
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/radio.sh[~/.config/yadm/bootstrap.d/radio.sh]
+
+=== GPG
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/gpg.sh[~/.config/yadm/bootstrap.d/gpg.sh]

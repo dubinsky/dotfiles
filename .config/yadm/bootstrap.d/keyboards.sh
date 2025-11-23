@@ -13,10 +13,11 @@ curl -fsSL https://oryx.nyc3.cdn.digitaloceanspaces.com/keymapp/keymapp-latest.t
   { echo "Download or extraction failed"; exit 1; }
 
 # install udev rules
-if [ ! -f /etc/udev/rules.d/50-zsa.rules ]; then
+RULES="/etc/udev/rules.d/"
+if [ ! -f "$RULES/50-zsa.rules" ]; then
   echo "Installing ZSA udev rules"
-  sudo mkdir -p /etc/udev/rules.d/
-  sudo cp ./etc/udev/rules.d/50-zsa.rules /etc/udev/rules.d/
+  sudo mkdir -p $RULES
+  sudo cp "./$RULES/50-zsa.rules" $RULES
   sudo groupadd plugdev
   sudo usermod -aG plugdev $USER
   sudo udevadm control --reload
