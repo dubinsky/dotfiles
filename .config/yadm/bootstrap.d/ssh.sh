@@ -8,3 +8,6 @@ systemctl enable --now --user ssh-agent.service
 
 # enable SSH server
 sudo systemctl enable --now sshd.service
+
+# update yadm repo origin URL
+yadm remote set-url origin "git@github.com:dubinsky/dotfiles.git"

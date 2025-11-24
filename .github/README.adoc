@@ -48,6 +48,11 @@ To install `yadm` on `Omarchy`:
 [source,shell]
 ----
 $ sudo pacman -S yadm
+$ yadm init
+$ yadm remote add origin "git@github.com:dubinsky/dotfiles.git"
+$ yadm add <file>
+$ yadm commit -m "<message>"
+$ yadm push
 ----
 
 === bootstrap
@@ -77,6 +82,15 @@ of doing that, but there are approaches that are not `yadm`-specific:
 - https://github.com/getsops/sops[SOPS]
 
 `yadm` supports `transcrypt`  and `git-crypt` directly.
+
+=== Clone
+
+On the new machine, run:
+
+[source,shell]
+----
+$ yadm clone --bootstrap https://github.com/dubinsky/dotfiles.git
+----
 
 == Omarchy
 
