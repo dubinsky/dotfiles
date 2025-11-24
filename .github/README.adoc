@@ -221,11 +221,19 @@ https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.c
 
 - Zotero: https://github.com/dubinsky/dotfiles/tree/master/.zotero/zotero/kx3ct6er.default/prefs.js[~/.zotero/zotero/kx3ct6er.default/prefs.js]
 
+- manual: install https://github.com/wileyyugioh/zotmoov[ZotMoove] Zotero plugin
+
+- manual: install https://retorque.re/zotero-better-bibtex/[Better BibTex] Zotero plugin
+
+- Zotero keyboard binding:
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
+
+- Calibre keyboard binding:
+https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.config/hypr/bindings.conf];
+
 - syncthing: https://github.com/dubinsky/dotfiles/tree/master/.config/syncthing/config.xml[~/.config/syncthing/config.xml]
 
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[~/.config/yadm/bootstrap.d/asciidoctor.sh]
-
-TODO add keybindings
 
 === Health
 

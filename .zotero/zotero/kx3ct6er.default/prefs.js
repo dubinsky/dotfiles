@@ -14,7 +14,7 @@ user_pref("app.update.lastUpdateTime.addon-background-update-timer", 1763940697)
 user_pref("app.update.lastUpdateTime.background-update-timer", 1763940697);
 user_pref("app.update.lastUpdateTime.xpi-signature-verification", 1763940697);
 user_pref("browser.laterrun.bookkeeping.profileCreationTime", 1762235609);
-user_pref("browser.laterrun.bookkeeping.sessionCount", 7);
+user_pref("browser.laterrun.bookkeeping.sessionCount", 12);
 user_pref("browser.laterrun.enabled", true);
 user_pref("browser.startup.homepage_override.buildID", "20240801134912");
 user_pref("browser.startup.homepage_override.mstone", "115.14.0");
@@ -65,3 +65,4 @@ user_pref("security.sandbox.content.tempDirSuffix", "99a96b0e-901f-4878-94fc-ff2
 user_pref("storage.vacuum.last.index", 0);
 user_pref("storage.vacuum.last.places.sqlite", 1763941932);
 user_pref("toolkit.startup.last_success", 1763941597);
+user_pref("toolkit.startup.recent_crashes", 1);
