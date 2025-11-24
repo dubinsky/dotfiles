@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo pacman -S --needed direnv
+sudo pacman -S --needed --noconfirm direnv

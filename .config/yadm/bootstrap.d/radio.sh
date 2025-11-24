@@ -1,5 +1,5 @@
 #!/bin/bash
 
-sudo pacman -S --needed gqrx
+sudo pacman -S --needed --noconfirm gqrx
 
-yay -S --needed chirp-next sdrpp-git sdrsharp
+yay -S --needed --noconfirm chirp-next sdrpp-git sdrsharp

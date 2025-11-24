@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # CPAP machine
-yay -S --needed oscar
+yay -S --needed --noconfirm oscar
