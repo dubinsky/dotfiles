@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # install Yubikey utilities
-sudo pacman -S --needed yubikey-personalization-gui yubikey-manager libfido2
+sudo pacman -S --needed --noconfirm yubikey-personalization-gui yubikey-manager libfido2
 
 # enable SSH agent
 systemctl enable --now --user ssh-agent.service

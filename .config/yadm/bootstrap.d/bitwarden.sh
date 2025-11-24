@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Bitwarden
-sudo pacman -S --needed bitwarden bitwarden-cli
+sudo pacman -S --needed --noconfirm bitwarden bitwarden-cli
 
 # Remove 1Password
 pacman -Q 1password-cli && sudo pacman -Rns 1password-cli || echo "1password-cli is not installed"

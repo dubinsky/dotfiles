@@ -3,7 +3,7 @@
 # follow instructions at https://github.com/zsa/wally/wiki/Linux-install
 
 # ZSA keyboards support
-sudo pacman -S --needed libusb webkit2gtk-4.1 gtk3
+sudo pacman -S --needed --noconfirm libusb webkit2gtk-4.1 gtk3
 
 # install `keymapp` utility
 KEYMAPP="$HOME/.local/share/keymapp/bin/"

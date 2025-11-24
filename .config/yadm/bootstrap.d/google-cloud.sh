@@ -1,3 +1,3 @@
 #!/bin/bash
 
-yay -S --needed google-cloud-cli
+yay -S --needed --noconfirm google-cloud-cli

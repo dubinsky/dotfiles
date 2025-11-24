@@ -4,4 +4,4 @@
 omarchy-refresh-pacman-mirrorlist edge
 
 # firmware upgrader
-sudo pacman -S --needed fwupd
+sudo pacman -S --needed --noconfirm fwupd

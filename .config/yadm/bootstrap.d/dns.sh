@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # `drill` DNS tool
-sudo pacman -S --needed ldns
+sudo pacman -S --needed --noconfirm ldns
 
 # Enable DHCP search domain (using configuration drop-in)
 DROP_INS="/etc/systemd/networkd.conf.d/"
