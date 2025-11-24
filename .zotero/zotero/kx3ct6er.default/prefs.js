@@ -9,12 +9,12 @@
 // - modify it via the UI (e.g. via about:config in the browser); or
 // - set it within a user.js file in your profile.
 
-user_pref("app.update.backgroundErrors", 2);
+user_pref("app.update.backgroundErrors", 3);
 user_pref("app.update.lastUpdateTime.addon-background-update-timer", 1763940697);
-user_pref("app.update.lastUpdateTime.background-update-timer", 1763940697);
+user_pref("app.update.lastUpdateTime.background-update-timer", 1764012199);
 user_pref("app.update.lastUpdateTime.xpi-signature-verification", 1763940697);
 user_pref("browser.laterrun.bookkeeping.profileCreationTime", 1762235609);
-user_pref("browser.laterrun.bookkeeping.sessionCount", 12);
+user_pref("browser.laterrun.bookkeeping.sessionCount", 13);
 user_pref("browser.laterrun.enabled", true);
 user_pref("browser.startup.homepage_override.buildID", "20240801134912");
 user_pref("browser.startup.homepage_override.mstone", "115.14.0");
@@ -32,7 +32,7 @@ user_pref("extensions.zotero.dataDir", "/home/dub/Books/Zotero");
 user_pref("extensions.zotero.firstRun.skipFirefoxProfileAccessCheck", true);
 user_pref("extensions.zotero.firstRun2", false);
 user_pref("extensions.zotero.lastSelectedPrefPane", "zotmoov_basic");
-user_pref("extensions.zotero.lastViewedFolder", "C2");
+user_pref("extensions.zotero.lastViewedFolder", "C22");
 user_pref("extensions.zotero.pane.persist", "{\"zotero-reader-sidebar-pane\":{\"collapsed\":\"true\"},\"zotero-layout-switcher\":{\"orient\":\"horizontal\"},\"zotero-items-splitter\":{\"orient\":\"horizontal\"},\"zotero-item-pane\":{\"width\":\"337\",\"height\":\"205\"},\"zotero-context-splitter\":{\"state\":\"collapsed\"},\"zotero-context-splitter-stacked\":{\"state\":\"collapsed\"}}");
 user_pref("extensions.zotero.panes.abstract.open", true);
 user_pref("extensions.zotero.panes.attachment-annotations.open", true);
@@ -46,6 +46,10 @@ user_pref("extensions.zotero.panes.notes.open", true);
 user_pref("extensions.zotero.panes.related.open", true);
 user_pref("extensions.zotero.panes.tags.open", true);
 user_pref("extensions.zotero.prefVersion", 13);
+user_pref("extensions.zotero.purge.creators", true);
+user_pref("extensions.zotero.purge.items", true);
+user_pref("extensions.zotero.purge.tags", true);
+user_pref("extensions.zotero.sourceList.persist", "{\"L1\":true,\"C14\":true,\"P1\":false}");
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.lower + shorttitle(3, 3) + year");
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormatEditing", "auth.lower + shorttitle(3, 3) + year");
 user_pref("extensions.zotero.translators.better-bibtex.path.git", "/usr/bin/git");
@@ -56,6 +60,8 @@ user_pref("extensions.zoteroOpenOfficeIntegration.lastAttemptedVersion", "7.0.5.
 user_pref("extensions.zoteroOpenOfficeIntegration.unopkgPaths", "{\"/usr/bin/unopkg\":true,\"/usr/lib/libreoffice/program/unopkg\":true,\"/usr/lib64/libreoffice/program/unopkg\":true}");
 user_pref("extensions.zoteroOpenOfficeIntegration.version", "7.0.5.SOURCE");
 user_pref("extensions.zotmoov.dst_dir", "/home/dub/Books/ZoteroAttachments");
+user_pref("extensions.zotmoov.enable_automove", false);
+user_pref("extensions.zotmoov.enable_subdir_move", true);
 user_pref("gecko.handlerService.defaultHandlersVersion", 1);
 user_pref("idle.lastDailyNotification", 1763941932);
 user_pref("intl.accept_languages", "en-US, en");
@@ -65,4 +71,3 @@ user_pref("security.sandbox.content.tempDirSuffix", "99a96b0e-901f-4878-94fc-ff2
 user_pref("storage.vacuum.last.index", 0);
 user_pref("storage.vacuum.last.places.sqlite", 1763941932);
 user_pref("toolkit.startup.last_success", 1763941597);
-user_pref("toolkit.startup.recent_crashes", 1);
