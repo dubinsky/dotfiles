@@ -190,8 +190,11 @@ see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on
 - theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[~/.config/mc/ini]
 
 === Obsidian
-- manual: enable community plugins;
-- manual: set theme to `Omarchy` so that Obsidian follows theme changes; this theme becomes available in an Obsidian vault only after Omarchy theme was changed at least once after Obsidian vault was opened.
+
+- manual: open the vault in `~/Podval/dub.podval.org`
+- manual: change Omarchy theme (this makes Omarchy theme available in Obsidian)
+- manual: set theme to `Omarchy` so that Obsidian follows theme changes
+- manual: enable community plugins
 - manual: to increase font size of both the user interface that the editor, set
 `Settings | Appearance | Advanced | Zoom level` to 150% and
 `Settings | Appearance | Font size` to 16.
@@ -212,11 +215,17 @@ https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[~/.c
 
 === Books
 
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[~/.config/yadm/bootstrap.d/asciidoctor.sh]
-
 - bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/books.sh[~/.config/yadm/bootstrap.d/books.sh]
 
+- Calibre Library: https://github.com/dubinsky/dotfiles/tree/master/.config/calibre/global.py.json[~/.config/calibre/global.py.json]
+
+- Zotero: https://github.com/dubinsky/dotfiles/tree/master/.zotero/zotero/kx3ct6er.default/prefs.js[~/.zotero/zotero/kx3ct6er.default/prefs.js]
+
 - syncthing: https://github.com/dubinsky/dotfiles/tree/master/.config/syncthing/config.xml[~/.config/syncthing/config.xml]
+
+- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[~/.config/yadm/bootstrap.d/asciidoctor.sh]
+
+TODO add keybindings
 
 === Health
 
