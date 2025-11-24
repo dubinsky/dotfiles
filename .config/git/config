@@ -12,3 +12,12 @@
 [user]
 	name = Leonid Dubinsky
 	email = dub@podval.org
+
+; email address is overridden in the .envrc files -
+; but IntelliJ does not pick it up...
+
+[includeIf "gitdir:~/OpenTorah/"]
+path = ~/OpenTorah/.gitconfig
+
+[includeIf "gitdir:~/CognoMath/"]
+path = ~/CognoMath/.gitconfig

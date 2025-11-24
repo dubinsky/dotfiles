@@ -10,7 +10,5 @@ source ~/.local/share/omarchy/default/bash/rc
 # Make an alias for invoking commands you use constantly
 # alias p='python'
 
-export RCLONE_CONFIG="$HOME/Podval/Keys/rclone.conf"
-
 # Enable `direnv` (must be at the end of the file)
 eval "$(direnv hook bash)"
