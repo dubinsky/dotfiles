@@ -55,7 +55,7 @@ $ yadm commit -m "<message>"
 $ yadm push
 ----
 
-=== bootstrap
+=== Bootstrap
 
 After checkout, `yadm` https://yadm.io/docs/bootstrap[runs]
 `.config/yadm/bootstrap` executable;
@@ -63,7 +63,7 @@ it can also be run explicitly: `yadm bootstrap`.
 I use a https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap[script] copied from the `yadm` manual
 which runs all the executables in `.config/yadm/bootstrap.d/`.
 
-=== README
+=== Readme
 
 There are https://github.com/yadm-dev/yadm/issues/93[ways] to add README
 to the `yadm` repository without polluting the home directory;
@@ -92,171 +92,33 @@ On the new machine, run:
 $ yadm clone --bootstrap https://github.com/dubinsky/dotfiles.git
 ----
 
-== Omarchy
+yadm does not change pre-existing files;
+they can be overwritten by `$ yadm checkout <file>`.
 
-Bootstrap, configuration, and manual tweaks to set up Omarchy.
-
-=== Updates
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/00-updates.sh[.config/yadm/bootstrap.d/00-updates.sh]
-
-=== DNS
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/dns.sh[.config/yadm/bootstrap.d/dns.sh]
-
-- UseDomains drop-in: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/systemd/network.conf.d/80-UseDomains.conf[.config/yadm/etc/systemd/network.conf.d/80-UseDomains.conf]
-
-- /etc/hosts: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/hosts[.config/yadm/etc/hosts]
-
-=== Monitors
-
-- https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/monitors.conf[.config/hypr/monitors.conf]
-
-=== Fonts
-- `Hyprland`: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/looknfeel.conf[.config/hypr/looknfeel.conf]
-- `Ghostty`:  https://github.com/dubinsky/dotfiles/tree/master/.config/ghosttty/config[.config/ghosttty/config`]
-- `Alacritty`: https://github.com/dubinsky/dotfiles/tree/master/.config/alacritty/alacritty.toml[.config/alacritty/alacritty.toml]
+== Manual Tweaks
 
 === Keyboards
-
-- keyboard layouts: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/input.conf[.config/hypr/input.conf]
-- keyboard layout indicator: https://github.com/dubinsky/dotfiles/tree/master/.config/waybar/config.jsonc[.config/waybar/config.jsonc]
-- keyboard layout indicator styling and font size: https://github.com/dubinsky/dotfiles/tree/master/.config/waybar/style.css[.config/waybar/style.css]
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/keyboards.sh[.config/yadm/bootstrap.d/keyboards.sh]
-
-- udev rules: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/etc/udev/rules.d/50-zsa.rules[.config/yadm/etc/udev/rules.d/50-zsa.rules]
-
-- `keymapp` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[.bash_profile];
-
 - TODO add desktop entry and/or key binding for keymapp...
 
-=== Mice
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mice.sh[.config/yadm/bootstrap.d/mice.sh]
-
-=== DirEnv
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/direnv.sh[.config/yadm/bootstrap.d/direnv.sh]
-
-- hook into the shell:
-https://github.com/dubinsky/dotfiles/tree/master/.bashrc[.bashrc];
-
-- status in the prompt: https://github.com/dubinsky/dotfiles/tree/master/.config/starship.toml[.config/starship.toml];
-
-=== SSH
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/yubikey.sh[.config/yadm/bootstrap.d/ssh.sh]
-
-- `SSH` agent socket: https://github.com/dubinsky/dotfiles/tree/master/.config/uwsm/env[.config/uwsm/env];
-
-- `SSH` configuration: https://github.com/dubinsky/dotfiles/tree/master/.ssh/config[.ssh/config];
-
-- `SSH` authorized keys: https://github.com/dubinsky/dotfiles/tree/master/.ssh/authorized_keys[.ssh/authorized_keys];
-
-=== Java
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/java.sh[.config/yadm/bootstrap.d/java.sh]
-
-- https://github.com/dubinsky/dotfiles/tree/master/.gradle/gradle.properties[.gradle/gradle.properties]
-
-- https://github.com/dubinsky/dotfiles/tree/master/.config/git/config[.config/git/config]
-
-=== Organizations
-
-- https://github.com/dubinsky/dotfiles/tree/master/Projects/.envrc[Projects/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[.gitconfig]
-- https://github.com/dubinsky/dotfiles/tree/master/.envrc[CognoMath/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[CognoMath/.gitconfig]
-- https://github.com/dubinsky/dotfiles/tree/master/.envrc[OpenTorah/.envrc]
-- https://github.com/dubinsky/dotfiles/tree/master/.gitconfig[OpenTorah/.gitconfig]
-
-=== JetBrains
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/jetbrains.sh[.config/yadm/bootstrap.d/jetbrains.sh]
-
-- `JetBrains Toolbox` on the path: https://github.com/dubinsky/dotfiles/tree/master/.bash_profile[.bash_profile]
-
-- `IntelliJ` keyboard binding:
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[.config/hypr/bindings.conf]
-
-- windows rules: https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/jetbrains.conf[.config/hypr/jetbrains.conf],
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/hyprland.conf[.config/hypr/hyprland.conf]
-
-- manual: enable native Wayland support:
+=== IntelliJ IDEA
+- enable native Wayland support:
 select `Help | Edit custom VM options` and add `-Dawt.toolkit.name=WLToolkit`;
 see  https://youtrack.jetbrains.com/articles/SUPPORT-A-1166/Linux-how-to-turn-on-off-native-Wayland-mode
 
-=== Pulumi and Besom
+=== Chromium
 
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/pulumi.sh[.config/yadm/bootstrap.d/pulumi.sh]
-
-=== Synchronization and Backup
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/syncs.sh[.config/yadm/bootstrap.d/syncs.sh]
-
-=== Google Cloud
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/google-cloud.sh[.config/yadm/bootstrap.d/google-cloud.sh]
-
-=== Midnight Commander
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/mc.sh[.config/yadm/bootstrap.d/mc.sh]
-- theme, font: https://github.com/dubinsky/dotfiles/tree/master/.config/mc/ini[.config/mc/ini]
+- TODO what theme should I use to be able to change font size?
 
 === Obsidian
 
-- manual: open the vault in `Podval/dub.podval.org`
-- manual: change Omarchy theme (this makes Omarchy theme available in Obsidian)
-- manual: set theme to `Omarchy` so that Obsidian follows theme changes
-- manual: enable community plugins
-- manual: to increase font size of both the user interface that the editor, set
+- open the vault in `Podval/dub.podval.org`
+- change Omarchy theme (this makes Omarchy theme available in Obsidian)
+- set theme to `Omarchy` so that Obsidian follows theme changes
+- enable community plugins
+- to increase font size of both the user interface that the editor, set
 `Settings | Appearance | Advanced | Zoom level` to 150% and
 `Settings | Appearance | Font size` to 16.
 
-=== Chromium
-
-- ability to log into Google account and synchronize bookmarks etc.:
-.config/chromium-flags.conf
-(manual: `Omarchy | Install | Service | Chromium Account`);
-- manual: TODO what theme should I use to be able to change font size?
-
-=== BitWarden
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/bitwarden.sh[.config/yadm/bootstrap.d/bitwarden.sh]
-
-- keyboard binding (replaces `1Password`):
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[.config/hypr/bindings.conf];
-
-=== Books
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/books.sh[.config/yadm/bootstrap.d/books.sh]
-
-- Calibre Library: https://github.com/dubinsky/dotfiles/tree/master/.config/calibre/global.py.json[.config/calibre/global.py.json]
-
-- Zotero profile: https://github.com/dubinsky/dotfiles/tree/master/.zotero/zotero/profiles.ini[.zotero/zotero/profiles.ini]
-
-- Zotero preferences: https://github.com/dubinsky/dotfiles/tree/master/.zotero/zotero/kx3ct6er.default/prefs.js[.zotero/zotero/kx3ct6er.default/prefs.js]
-
-- manual: install https://github.com/wileyyugioh/zotmoov[ZotMoove] Zotero plugin
-
-- manual: install https://retorque.re/zotero-better-bibtex/[Better BibTex] Zotero plugin
-
-- Zotero keyboard binding:
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[.config/hypr/bindings.conf];
-
-- Calibre keyboard binding:
-https://github.com/dubinsky/dotfiles/tree/master/.config/hypr/bindings.conf[.config/hypr/bindings.conf];
-
-- syncthing: https://github.com/dubinsky/dotfiles/tree/master/.config/syncthing/config.xml[.config/syncthing/config.xml]
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/asciidoctor.sh[.config/yadm/bootstrap.d/asciidoctor.sh]
-
-=== Health
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/health.sh[.config/yadm/bootstrap.d/health.sh]
-
-- OSCAR: https://github.com/dubinsky/dotfiles/tree/master/.config/OSCAR_Team/OSCAR.conf[.config/OSCAR_Team/OSCAR.conf]
-
-=== Radio
-
-- bootstrap: https://github.com/dubinsky/dotfiles/tree/master/.config/yadm/bootstrap.d/radio.sh[.config/yadm/bootstrap.d/radio.sh]
+=== Zotero
+- install https://github.com/wileyyugioh/zotmoov[ZotMoove] plugin
+- install https://retorque.re/zotero-better-bibtex/[Better BibTex] plugin
