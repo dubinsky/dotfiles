@@ -12,6 +12,7 @@
 [user]
 	name = Leonid Dubinsky
 	email = dub@podval.org
+	signingkey = C0525CD6511BCEB1
 
 ; email address is overridden in the .envrc files -
 ; but IntelliJ does not pick it up...
