@@ -5,6 +5,6 @@
 yay -S --needed --noconfirm devpod-community-bin
 
 # DevPod is written in Go, so for developing it we need:
-sudo pacman -S --needed --noconfirm go go-tools golangci-lint
+sudo pacman -S --needed --noconfirm go go-tools golangci-lint go-task goreleaser
 
 echo "Install pre-commit zipapp from https://pre-commit.com/#install"
