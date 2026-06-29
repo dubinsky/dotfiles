@@ -12,3 +12,8 @@ source ~/.local/share/omarchy/default/bash/rc
 
 # Enable `direnv` (must be at the end of the file)
 eval "$(direnv hook bash)"
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+[[ -r "$HOME/.grok/completions/bash/grok.bash" ]] && source "$HOME/.grok/completions/bash/grok.bash"
+# <<< grok installer <<<

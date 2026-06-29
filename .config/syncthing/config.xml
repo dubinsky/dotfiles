@@ -7,6 +7,9 @@
         <device id="SUBSHCY-NSETTXX-6TZCO2D-2VFMKZL-O554NSZ-4CZ7XEW-AY7HJWR-5HIFKAQ" introducedBy="">
             <encryptionPassword></encryptionPassword>
         </device>
+        <device id="4EQFOSJ-D6O4TCB-AFYYCUN-PD3OHD6-3EJPWE4-JSTEV4G-VUTXIMX-X5DW4QY" introducedBy="">
+            <encryptionPassword></encryptionPassword>
+        </device>
         <minDiskFree unit="%">1</minDiskFree>
         <versioning>
             <cleanupIntervalS>3600</cleanupIntervalS>
@@ -48,6 +51,9 @@
             <encryptionPassword></encryptionPassword>
         </device>
         <device id="SUBSHCY-NSETTXX-6TZCO2D-2VFMKZL-O554NSZ-4CZ7XEW-AY7HJWR-5HIFKAQ" introducedBy="">
+            <encryptionPassword></encryptionPassword>
+        </device>
+        <device id="4EQFOSJ-D6O4TCB-AFYYCUN-PD3OHD6-3EJPWE4-JSTEV4G-VUTXIMX-X5DW4QY" introducedBy="">
             <encryptionPassword></encryptionPassword>
         </device>
         <minDiskFree unit="%">1</minDiskFree>
@@ -97,6 +103,17 @@
         <numConnections>0</numConnections>
     </device>
     <device id="SUBSHCY-NSETTXX-6TZCO2D-2VFMKZL-O554NSZ-4CZ7XEW-AY7HJWR-5HIFKAQ" name="aluminum" compression="metadata" introducer="false" skipIntroductionRemovals="false" introducedBy="">
+        <address>dynamic</address>
+        <paused>false</paused>
+        <autoAcceptFolders>false</autoAcceptFolders>
+        <maxSendKbps>0</maxSendKbps>
+        <maxRecvKbps>0</maxRecvKbps>
+        <maxRequestKiB>0</maxRequestKiB>
+        <untrusted>false</untrusted>
+        <remoteGUIPort>0</remoteGUIPort>
+        <numConnections>0</numConnections>
+    </device>
+    <device id="4EQFOSJ-D6O4TCB-AFYYCUN-PD3OHD6-3EJPWE4-JSTEV4G-VUTXIMX-X5DW4QY" name="kobo" compression="metadata" introducer="false" skipIntroductionRemovals="false" introducedBy="">
         <address>dynamic</address>
         <paused>false</paused>
         <autoAcceptFolders>false</autoAcceptFolders>
