@@ -3,5 +3,5 @@
 Podval/Keys/**
 OpenTorah/Keys/**
 CognoMath/Keys/**
-.config/unifi/api.key
+.grok/unifi/api.key
 .config/rclone/rclone.conf
