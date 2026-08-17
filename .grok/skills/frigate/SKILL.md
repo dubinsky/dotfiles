@@ -67,7 +67,7 @@ Container: `ghcr.io/blakeblackshear/frigate:stable`, no Coral/GPU devices. Ports
 
 ## Cameras (last inventoried)
 
-One camera: **doorbell** (Reolink at `192.168.1.203`). go2rtc pulls `Preview_01_main` / `Preview_01_sub` with `{FRIGATE_DOORBELL_PASSWORD}`; Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*` (`preset-rtsp-restream`). Detect 480×640 on the sub stream; record+audio on main.
+One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). go2rtc pulls `Preview_01_main` / `Preview_01_sub` with `{FRIGATE_DOORBELL_PASSWORD}`; Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*` (`preset-rtsp-restream`). Detect 480×640 on the sub stream; record+audio on main. `.203` is stale.
 
 ## First move in a new session
 
