@@ -1,6 +1,6 @@
 #!/bin/bash
 # Open a visible terminal so Leonid can tap the YubiKey.
-# Usage: yk-tap <ha|pve|docker|unifi|git>
+# Usage: ~/.grok/scripts/yk-tap <ha|pve|docker|unifi|git>
 # Exit 0 if a ControlMaster already works, or after a successful tap.
 set -euo pipefail
 
@@ -14,7 +14,7 @@ case "$target" in
   unifi)  user=root; host=192.168.1.184;                port=22; ssh_host=unifi; banner="root@192.168.1.184 (unifi)" ;;
   git)    user=git;  host=github.com;                   port=22; ssh_host=git@github.com; banner="git@github.com" ;;
   *)
-    echo "usage: yk-tap <ha|pve|docker|unifi|git> [ready-file]" >&2
+    echo "usage: ~/.grok/scripts/yk-tap <ha|pve|docker|unifi|git> [ready-file]" >&2
     exit 2
     ;;
 esac

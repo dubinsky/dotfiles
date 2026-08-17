@@ -7,13 +7,13 @@ Leonid authenticates SSH and Git with a YubiKey FIDO2 key (`~/.ssh/id_ed25519_sk
 Before any command that talks to a YubiKey-gated host:
 
 1. State **user@host** (and the alias) in the user-facing message.
-2. Run `yk-tap <ha|pve|docker|unifi|git>` (script: `~/.local/bin/yk-tap`). That opens a **separate visible terminal** whose only job is “TAP THE YUBIKEY NOW” and establishing `ControlMaster`.
+2. Run `~/.grok/scripts/yk-tap <ha|pve|docker|unifi|git>`. That opens a **separate visible terminal** whose only job is “TAP THE YUBIKEY NOW” and establishing `ControlMaster`. The script is Grok-only and is not on PATH.
 3. Wait for the ready file (`/tmp/yk-tap-<alias>.ready`, or the path you passed).
 4. Then run the real `ssh` / `yadm push` so it reuses the mux.
 
-Skip `yk-tap` only when `ssh -O check <alias>` already succeeds (mux live). After a reboot of the remote, delete the stale socket (`~/.ssh/control/ssh-…`) and run `yk-tap` again.
+Skip the helper only when `ssh -O check <alias>` already succeeds (mux live). After a reboot of the remote, delete the stale socket (`~/.ssh/control/ssh-…`) and run it again.
 
-Do this for Git remotes (`yadm push`, `git push`) and house SSH. `Host *` in `~/.ssh/config` uses the same key everywhere. `ControlPersist` on muxes opened by `yk-tap` is 15 minutes.
+Do this for Git remotes (`yadm push`, `git push`) and house SSH. `Host *` in `~/.ssh/config` uses the same key everywhere. `ControlPersist` on muxes opened by the helper is 15 minutes.
 
 | Alias | User | Host |
 |---|---|---|
@@ -25,4 +25,4 @@ Do this for Git remotes (`yadm push`, `git push`) and house SSH. `Host *` in `~/
 
 Example: “Opening a terminal — tap the YubiKey for `root@192.168.1.40` (`pve`).”
 
-If `yk-tap` fails, ask him to plug the key in and tap in that window; do not fall back to silent `BatchMode` loops.
+If the helper fails, ask him to plug the key in and tap in that window; do not fall back to silent `BatchMode` loops.
