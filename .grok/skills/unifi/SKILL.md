@@ -17,19 +17,19 @@ There is no UniFi MCP.
 
 ## Local API (preferred)
 
-Non-secret URL: `~/.grok/unifi/api.env`. Secret (mode 600, never print, never `set -x`, never yadm): `~/.grok/unifi/api.key` (raw key, one line). `source` of `api.env` loads both. Grok-only — not under `~/.config/unifi`.
+Non-secret URL: `~/.grok/skills/unifi/api.env`. Secret (mode 600, never print, never `set -x`, never yadm): sibling `api.key` (raw key, one line). `source` of `api.env` loads both.
 
 ```
 # api.env
 UNIFI_URL=https://192.168.1.184:11443
-UNIFI_API_KEY=$(<"${HOME}/.grok/unifi/api.key")
+UNIFI_API_KEY=$(<"${HOME}/.grok/skills/unifi/api.key")
 ```
 
 Create the key in the UI (shown once): **https://192.168.1.184:11443/network/default/integrations** → Create New API Key → name it `grok`. Or: Network → Settings → Control Plane → Integrations. Do not use a Site Manager / unifi.ui.com cloud key. Put only the secret in `api.key`.
 
 ```bash
 set +x
-source ~/.grok/unifi/api.env
+source ~/.grok/skills/unifi/api.env
 curl -sk -o /tmp/unifi-api.out -w '%{http_code}\n' \
   -H "X-API-KEY: ${UNIFI_API_KEY}" -H 'Accept: application/json' \
   "${UNIFI_URL}/proxy/network/integration/v1/sites"
@@ -112,6 +112,6 @@ WLANs (do not print keys): `podval-u` is **5 GHz only** (people); `podval-2g` is
 
 ## First move in a new session
 
-1. Confirm `~/.grok/unifi/api.key` is non-empty, then `source ~/.grok/unifi/api.env`. GET `/proxy/network/integration/v1/sites` (do not print the key).
+1. Confirm `~/.grok/skills/unifi/api.key` is non-empty, then `source ~/.grok/skills/unifi/api.env`. GET `/proxy/network/integration/v1/sites` (do not print the key).
 2. Inventory only the devices or WLANs you will touch.
 3. Change via the API; say what needs a device provision. Use `ssh unifi` only for container/host issues.

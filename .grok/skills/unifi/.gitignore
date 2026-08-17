@@ -1,0 +1,2 @@
+# Secret sibling of api.env; travels via yadm encrypt, not git.
+api.key

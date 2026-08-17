@@ -1,4 +1,4 @@
 # do not check in secrets!
 auth.json
 auth.json.lock
-unifi/api.key
+skills/unifi/api.key
