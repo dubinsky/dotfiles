@@ -61,7 +61,7 @@ Do **not** retry curl-to-Core, mint a long-lived token, or switch to Advanced SS
 
 Add-ons (started when last inventoried): Z-Wave JS, Terminal & SSH 10.3.0, Mosquitto, File editor, MQTT Explorer, Google Drive Backup, Node-RED, rtl_433 (next), rtl_433 MQTT Auto Discovery. Custom component: HACS only.
 
-Core was **2026.8.1** on qemux86-64 (HAOS VM). Hostnames: `homeassistant.local`, `homeassistant.lan.podval.org`. **Not** 192.168.1.245 (that's the UniFi switch).
+Core was **2026.8.1** on qemux86-64 (HAOS VM). Hostnames: `homeassistant.local`, `homeassistant.lan.podval.org`. **Not** 192.168.1.245 (that's the UniFi switch). Core HTTP is `:8123` with `ssl: false`. Doorbell talk/mic needs a secure context; today that means Nabu Casa. **Later (do not start unless asked): local HTTPS** so talk works on the LAN without Nabu Casa.
 
 `rtl_433/next.conf.template`: MQTT to `homeassistant:1883`, protocol 20 only (Ambient Weather F007TH).
 
@@ -73,7 +73,7 @@ Existing YAML automations (do not clobber):
 
 - Tag Shabbos Lights → `scene.master_bedroom_shabbos_scene`
 - Refrigerator Shabbos Mode Toggle (device action, not a clean entity_id)
-- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → snapshot `camera.doorbell` → `notify.mobile_app_pixel_10`. Keep Reolink for the chime; disable Reolink camera entities.
+- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → `notify.mobile_app_pixel_10`. **Talk** opens YAML dashboard `/lovelace-doorbell/talk` (Advanced Camera Card 7.27.4 at `/config/www/advanced-camera-card/`, go2rtc `doorbell_sub` WebRTC + mic). **Reolink** still opens the app as fallback. HA must be **https** (Nabu Casa) for the browser mic. Keep Reolink for the chime; disable Reolink camera entities.
 - **Bathroom fan auto-off** (one automation per fan, `mode: restart`, 15 min) — do not combine into one automation; `mode: restart` is per-automation, not per entity:
   - `fan.master_bathroom_fan`
   - `fan.bathroom_fan` (UI name Bathroom Fan; helper over `switch.1st_floor_bathroom_fan`)
