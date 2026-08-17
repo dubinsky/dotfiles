@@ -17,14 +17,15 @@ There is no UniFi MCP.
 
 ## Local API (preferred)
 
-Key file (mode 600, never print, never `set -x`): `~/.config/unifi/api.env`
+Non-secret URL: `~/.config/unifi/api.env`. Secret (mode 600, never print, never `set -x`, never yadm): `~/.config/unifi/api.key` (raw key, one line). `source` of `api.env` loads both.
 
 ```
+# api.env
 UNIFI_URL=https://192.168.1.184:11443
-UNIFI_API_KEY=<local key from the controller UI>
+UNIFI_API_KEY=$(<"${BASH_SOURCE[0]%/*}/api.key")
 ```
 
-Create the key in the UI (shown once): **https://192.168.1.184:11443/network/default/integrations** → Create New API Key → name it `grok`. Or: Network → Settings → Control Plane → Integrations. Do not use a Site Manager / unifi.ui.com cloud key.
+Create the key in the UI (shown once): **https://192.168.1.184:11443/network/default/integrations** → Create New API Key → name it `grok`. Or: Network → Settings → Control Plane → Integrations. Do not use a Site Manager / unifi.ui.com cloud key. Put only the secret in `api.key`.
 
 ```bash
 set +x
@@ -111,6 +112,6 @@ WLANs (do not print keys): `podval-u` is **5 GHz only** (people); `podval-2g` is
 
 ## First move in a new session
 
-1. Confirm `~/.config/unifi/api.env` has a non-empty `UNIFI_API_KEY`. GET `/proxy/network/integration/v1/sites` (do not print the key).
+1. Confirm `~/.config/unifi/api.key` is non-empty, then `source ~/.config/unifi/api.env`. GET `/proxy/network/integration/v1/sites` (do not print the key).
 2. Inventory only the devices or WLANs you will touch.
 3. Change via the API; say what needs a device provision. Use `ssh unifi` only for container/host issues.
