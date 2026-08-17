@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export RCLONE_CONFIG="${HOME}/OpenTorah/Keys/rclone.conf"
+
 echo "--- syncing 'opentorah-drive:/alter-rebbe'"
 rclone --checksum --progress sync ~/OpenTorah/alter-rebbe opentorah-drive:/alter-rebbe
 

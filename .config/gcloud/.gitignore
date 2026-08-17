@@ -1,0 +1,5 @@
+# do not check in secrets!
+application_default_credentials.json
+credentials.db
+access_tokens.db
+legacy_credentials/
