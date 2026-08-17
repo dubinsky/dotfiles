@@ -1,0 +1,68 @@
+#!/bin/bash
+# Open a visible terminal so Leonid can tap the YubiKey.
+# Usage: yk-tap <ha|pve|docker|unifi|git>
+# Exit 0 if a ControlMaster already works, or after a successful tap.
+set -euo pipefail
+
+target="${1:-}"
+ready="${2:-}"
+
+case "$target" in
+  ha)     user=root; host=homeassistant.lan.podval.org; port=22; ssh_host=ha; banner="root@homeassistant.lan.podval.org (ha)" ;;
+  pve)    user=root; host=192.168.1.40;                 port=22; ssh_host=pve; banner="root@192.168.1.40 (pve)" ;;
+  docker) user=root; host=192.168.1.187;                port=22; ssh_host=docker; banner="root@192.168.1.187 (docker)" ;;
+  unifi)  user=root; host=192.168.1.184;                port=22; ssh_host=unifi; banner="root@192.168.1.184 (unifi)" ;;
+  git)    user=git;  host=github.com;                   port=22; ssh_host=git@github.com; banner="git@github.com" ;;
+  *)
+    echo "usage: yk-tap <ha|pve|docker|unifi|git> [ready-file]" >&2
+    exit 2
+    ;;
+esac
+
+ctrl="$HOME/.ssh/control/ssh-${user}@${host}:${port}"
+mkdir -p "$HOME/.ssh/control"
+
+if [ -S "$ctrl" ] && ssh -O check -o ControlPath="$ctrl" "$ssh_host" 2>/dev/null; then
+  echo "yk-tap: mux already live for $banner"
+  [ -n "$ready" ] && date -Iseconds >"$ready"
+  exit 0
+fi
+rm -f "$ctrl"
+
+if [ -z "$ready" ]; then
+  ready="/tmp/yk-tap-${target}.ready"
+fi
+rm -f "$ready"
+
+script=$(mktemp /tmp/yk-tap-XXXXXX.sh)
+chmod 700 "$script"
+cat >"$script" <<EOF
+#!/bin/bash
+set +e
+printf '\\n\\n  TAP THE YUBIKEY NOW\\n  %s\\n\\n' $(printf '%q' "$banner")
+if [ "$target" = git ]; then
+  ssh -o ControlMaster=yes -o ControlPersist=15m -o ControlPath=$(printf '%q' "$ctrl") -T git@github.com
+  rc=\$?
+  # GitHub prints "successfully authenticated" and exits 1
+  if [ \$rc -eq 1 ] || [ \$rc -eq 0 ]; then rc=0; fi
+else
+  ssh -o ControlMaster=yes -o ControlPersist=15m -o ControlPath=$(printf '%q' "$ctrl") $(printf '%q' "$ssh_host") true
+  rc=\$?
+fi
+if [ \$rc -eq 0 ]; then
+  date -Iseconds > $(printf '%q' "$ready")
+  echo
+  echo "OK — mux is up. You can close this window."
+else
+  echo
+  echo "FAILED (\$rc). Tap again or check the key is plugged in."
+fi
+read -r -p "Press Enter to close."
+rm -f $(printf '%q' "$script")
+EOF
+
+export DISPLAY="${DISPLAY:-:0}"
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/1000}"
+xdg-terminal-exec bash "$script"
+echo "yk-tap: opened terminal for $banner (ready $ready)"
