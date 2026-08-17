@@ -1,0 +1,7 @@
+# Secrets that travel with the dotfiles (encrypted as .local/share/yadm/archive).
+# Paths are relative to $HOME. yadm encrypt also copies these into info/exclude.
+Podval/Keys/**
+OpenTorah/Keys/**
+CognoMath/Keys/**
+.config/unifi/api.key
+.config/rclone/rclone.conf

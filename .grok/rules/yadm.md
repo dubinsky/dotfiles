@@ -22,7 +22,13 @@ git --git-dir="$HOME/.local/share/yadm/repo.git" --work-tree="$HOME" …
 - Only a small explicit set is tracked (~60–70 files: shell, Hypr/Omarchy, yadm bootstrap, a few `.grok/skills`, rclone helpers). `$HOME` is **not** a monorepo. Do not `yadm add` a whole tree.
 - `status.showUntrackedFiles = no`, so `yadm status` hides untracked files. Use `yadm ls-files` to see what is in the repo.
 - `git ls-tree HEAD` without `--full-tree` is cwd-relative and looks empty from a subdirectory. Prefer `yadm ls-files` or `git ls-tree -r --full-tree HEAD`.
-- Never track secrets. `.zotero/**/prefs.js` is already in the repo exclude (API keys leaked there once).
+- Never track secrets in plaintext. Traveling secrets go through `yadm encrypt` (see below). `.zotero/**/prefs.js` is in the repo exclude (API keys leaked there once).
 - `yadm` does not overwrite pre-existing files on clone; use `yadm checkout <file>` to force.
+
+## Secrets archive
+
+Patterns: `~/.config/yadm/encrypt`. Ciphertext: `~/.local/share/yadm/archive` (tracked). Recipient: YubiKey OpenPGP `049DC4EF6FB97468` (`yadm.gpg-recipient`). Public key: `~/.config/yadm/yubikey-openpgp.asc`. Private material is **only** on the 5C (serial 18600387); decrypt needs the card, User PIN, and a touch (`uif` decrypt=on). Encrypt uses the public key (no tap).
+
+After changing a secret: `yadm encrypt && yadm add ~/.local/share/yadm/archive && yadm commit`. On a new machine: import the `.asc` (bootstrap does this), `yadm decrypt`. Do not `yadm add` the matched plaintext files.
 
 When changing a tracked dotfile, commit with `yadm`, not with a project repo in a subdirectory.
