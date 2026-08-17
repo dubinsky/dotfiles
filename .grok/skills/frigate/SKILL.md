@@ -67,7 +67,7 @@ Container: `ghcr.io/blakeblackshear/frigate:stable`, no Coral/GPU devices. Ports
 
 ## Cameras (last inventoried)
 
-One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). go2rtc pulls `Preview_01_main` / `Preview_01_sub` with `{FRIGATE_DOORBELL_PASSWORD}`; Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*` (`preset-rtsp-restream`). Detect 480×640 on the sub stream; record+audio on main. `.203` is stale.
+One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). HTTP is enabled on the camera. go2rtc video is HTTP-FLV (`channel0_main.bcs` / `channel0_ext.bcs`); two-way talk is a second source `rtsp://…/Preview_01_sub` (no `ffmpeg:` prefix). Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*`. Detect 480×640 on the sub stream; record+audio on main. `.203` is stale. Do not URL-encode the doorbell password in the FLV query string.
 
 ## First move in a new session
 
