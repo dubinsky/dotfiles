@@ -26,7 +26,7 @@ ssh -o BatchMode=yes ha '…'
 | SSH alias | `ha` → `root@homeassistant.lan.podval.org` (`192.168.1.209`) |
 | Auth | YubiKey FIDO2 (`sk-ssh-ed25519`). Public key file: `~/.ssh/id_ed25519_sk.pub` |
 | Config | `~/.ssh/config` `Host ha` uses `IdentitiesOnly` + that `.pub` + `IdentityAgent` |
-| Jail | Official **Terminal & SSH** add-on (`core-ssh`). Not the Proxmox host. |
+| Jail | Official **Terminal & SSH** add-on (`core_ssh` 10.3.0). Not the Proxmox host. |
 | Config root | `/config` is a symlink to `/homeassistant` |
 
 The YubiKey cannot be touched from Grok. If `BatchMode` fails with permission denied, tell the user to plug in the key, run `ssh ha` once in a normal terminal, tap, then retry. `ControlPersist` is 5m (`Host *`).
@@ -41,12 +41,17 @@ scp -o BatchMode=yes ha:/homeassistant/.storage/core.entity_registry /tmp/ha-inv
 
 Do not copy or print `secrets.yaml` values or Supervisor tokens (`set -x` will leak `SUPERVISOR_TOKEN`).
 
+### Core API is not reachable from this SSH jail (not a transient 401)
+
+`core_ssh` has `hassio_api: true` / `hassio_role: manager` and **`homeassistant_api: false`**. That is the official add-on manifest (not a user option). `SUPERVISOR_TOKEN` is present and works for **Supervisor** (`ha core info`, `ha core check`, `http://supervisor/info` → 200). The same bearer against **Core** (`http://supervisor/core/api/…`) is **401**. Protection mode is on; there is no Docker socket, so we cannot exec into the Core container either.
+
+Do **not** retry curl-to-Core, mint a long-lived token, or switch to Advanced SSH unless the user asks. After YAML edits: `ha core check`, then tell the user to **Developer tools → YAML → Automations → Reload** (or toggle the automation). Need live state / last_triggered / notify: `scp` `/config/home-assistant_v2.db` and query it locally.
+
 ## Safety
 
 - **Never** write `.storage/`, `secrets.yaml`, `*.db*`, or Z-Wave/Zigbee keys.
 - Before editing YAML: `cp -a /config/automations.yaml /config/automations.yaml.bak.$(date +%Y%m%d%H%M%S)`
 - After edit: `ha core check`. Do not restart Core unless the user agrees.
-- **Cannot reload automations from SSH** (Supervisor token returns 401 on Core API). After a successful check, tell the user: **Developer tools → YAML → Automations → Reload**.
 - Do not invent `entity_id`s. Resolve them from `core.entity_registry` (`disabled_by` is null ⇒ enabled).
 - Prefer the entity the UI/voice uses. Example: `fan.master_bathroom_fan` is `switch_as_x` over `switch.master_bathroom_fan` — automate the **fan**.
 
