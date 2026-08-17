@@ -1,0 +1,5 @@
+[tools]
+codex = "latest"
+java = "25"
+node = "25.1.0"
+"npm:@xai-official/grok" = "latest"
