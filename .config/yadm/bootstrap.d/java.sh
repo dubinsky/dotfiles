@@ -1,7 +1,7 @@
 #!/bin/bash
 
-sudo pacman -S --needed --noconfirm jdk21-openjdk openjdk21-doc openjdk21-src
+sudo pacman -S --needed --noconfirm jdk25-openjdk openjdk25-doc openjdk25-src
 
-sudo archlinux-java set java-21-openjdk
+sudo archlinux-java set java-25-openjdk
 
-mise install java 21
+mise install java 25
