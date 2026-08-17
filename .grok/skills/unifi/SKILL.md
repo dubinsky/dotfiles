@@ -22,7 +22,7 @@ Non-secret URL: `~/.config/unifi/api.env`. Secret (mode 600, never print, never 
 ```
 # api.env
 UNIFI_URL=https://192.168.1.184:11443
-UNIFI_API_KEY=$(<"${BASH_SOURCE[0]%/*}/api.key")
+UNIFI_API_KEY=$(<"${HOME}/.config/unifi/api.key")
 ```
 
 Create the key in the UI (shown once): **https://192.168.1.184:11443/network/default/integrations** → Create New API Key → name it `grok`. Or: Network → Settings → Control Plane → Integrations. Do not use a Site Manager / unifi.ui.com cloud key. Put only the secret in `api.key`.
