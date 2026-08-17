@@ -49,14 +49,14 @@ Do not print `.env`, `config/.jwt_secret`, RTSP passwords, or `FRIGATE_*` values
 - Before YAML edits: `cp -a config.yaml config.yaml.bak.$(date +%Y%m%d%H%M%S)` (same for `compose.yml`).
 - After `config.yaml` change: `ssh docker 'docker restart frigate'` (or `docker compose -f /frigate/compose.yml up -d` if compose/binds changed). Check `docker logs frigate --tail 50` and that the container is healthy.
 - Do not `docker compose down` unless the user asked (drops the NVR).
-- MQTT is **disabled** in config. Do not enable it unless asked (HA has its own Reolink path).
+- MQTT is **enabled** to HA Mosquitto at `192.168.1.209:1883`, user `frigate`, password `FRIGATE_MQTT_PASSWORD` in `/frigate/.env` (also listed in `compose.yml` `environment`). Do not print it.
 
 ## Layout (re-check on disk)
 
 ```
 /mnt/data/apps/frigate/
   compose.yml          # restart: unless-stopped; binds /frigate/config and /frigate/storage
-  .env                 # FRIGATE_DOORBELL_PASSWORD, FRIGATE_RTSP_PASSWORD
+  .env                 # FRIGATE_DOORBELL_PASSWORD, FRIGATE_RTSP_PASSWORD, FRIGATE_MQTT_PASSWORD
   config/config.yaml   # cameras + go2rtc
   storage/             # recordings
 ```
@@ -67,7 +67,7 @@ Container: `ghcr.io/blakeblackshear/frigate:stable`, no Coral/GPU devices. Ports
 
 ## Cameras (last inventoried)
 
-One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). HTTP is enabled on the camera. go2rtc video is HTTP-FLV (`channel0_main.bcs` / `channel0_ext.bcs`); two-way talk is a second source `rtsp://…/Preview_01_sub` (no `ffmpeg:` prefix). Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*`. Detect 480×640 on the sub stream; record+audio on main. `.203` is stale. Do not URL-encode the doorbell password in the FLV query string.
+One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). HTTP is enabled on the camera. go2rtc video is HTTP-FLV (`channel0_main.bcs` / `channel0_ext.bcs`); two-way talk is a second source `rtsp://…/Preview_01_sub` (no `ffmpeg:` prefix). Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*`. Detect 480×640 on the sub stream; record+audio on main. Recording is enabled: keep motion segments 7 days, alerts/detections 14 days (`mode: motion`). `.203` is stale. Do not URL-encode the doorbell password in the FLV query string.
 
 ## First move in a new session
 

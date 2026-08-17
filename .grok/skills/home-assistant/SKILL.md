@@ -68,7 +68,7 @@ Existing YAML automations (do not clobber):
 
 - Tag Shabbos Lights → `scene.master_bedroom_shabbos_scene`
 - Refrigerator Shabbos Mode Toggle (device action, not a clean entity_id)
-- Reolink Doorbell Notification → snapshot `camera.front_door_fluent` → `notify.mobile_app_pixel_10`
+- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → snapshot `camera.doorbell` → `notify.mobile_app_pixel_10`. Keep Reolink for the chime; disable Reolink camera entities.
 - **Bathroom fan auto-off** (one automation per fan, `mode: restart`, 15 min) — do not combine into one automation; `mode: restart` is per-automation, not per entity:
   - `fan.master_bathroom_fan`
   - `fan.bathroom_fan` (UI name Bathroom Fan; helper over `switch.1st_floor_bathroom_fan`)
@@ -84,7 +84,7 @@ Those fan devices also have disabled Z-Wave `number.*_auto_turn_off_timer` confi
 - Garden: `valve.back_garden_water`, `switch.sonoff_swv`
 - Climate: `climate.t6_pro_z_wave_programmable_thermostat`
 - Boiler: `sensor.e3_vitodens_100_na_0521_*`
-- Doorbell: `binary_sensor.front_door_visitor`, `binary_sensor.front_door_person`, `camera.front_door_fluent`
+- Doorbell button/chime (Reolink): `binary_sensor.front_door_visitor`, `number.reolink_chime_*`. Video/person (Frigate): `camera.doorbell`, `binary_sensor.doorbell_person_occupancy`. Disable `camera.front_door_fluent`.
 - Phones: `device_tracker.pixel_10`, `notify.mobile_app_pixel_10`
 
 ~700 enabled entities, ~2600 registered. Many lights still have generic ids (`light.dimmer`, `light.light`). Use the registry `original_name` / `name` to disambiguate.
