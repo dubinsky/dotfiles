@@ -29,7 +29,7 @@ ssh -o BatchMode=yes pve '…'
 | Auth | Same YubiKey FIDO2 as HA (`~/.ssh/id_ed25519_sk.pub`) |
 | Config | `Host pve` uses `IdentitiesOnly` + that `.pub` + `IdentityAgent` |
 | Node | Standalone (no cluster / no corosync). Name: `proxmox` |
-| Version | PVE **9.2.4** (kernel 7.0.14-5-pve) when last inventoried |
+| Version | PVE **9.2.10** (kernel **7.0.14-12-pve**; keep previous **7.0.14-5**) |
 
 The YubiKey cannot be touched from Grok. If `BatchMode` fails with permission denied or `agent refused operation`, tell the user to plug in the key, run `ssh pve` once in a normal terminal, tap, then retry. `ControlPersist` is 5m (`Host *`).
 
@@ -39,7 +39,7 @@ Do not print cloudflared tunnel tokens, UniFi credentials, or Cloudflare API key
 
 ## Safety
 
-- **Never** `qm destroy` / `pct destroy`, wipe disks (`wipefs`, `mkfs`, `sgdisk`), or assemble the old `md127` RAID unless the user asked.
+- **Never** `qm destroy` / `pct destroy`, wipe disks (`wipefs`, `mkfs`, `sgdisk`), or assemble leftover RAID unless the user asked. `md127` (old 2×2T `/mnt/data`) is **stopped**; `/etc/mdadm/mdadm.conf` has `ARRAY <ignore> UUID=dbc353c9:9eddf842:f209850f:8c30d5ea` and `AUTO -all`. Do not start it.
 - Do not stop **100 (haos)** or **101 (docker)** without an explicit ask. Both are `onboot: 1`.
 - Before editing a guest config: `cp -a /etc/pve/qemu-server/NNN.conf /root/NNN.conf.bak.$(date +%Y%m%d%H%M%S)` (LXC: `/etc/pve/lxc/NNN.conf`).
 - Do not run community-scripts installers unless the user asked.
@@ -51,7 +51,7 @@ Do not print cloudflared tunnel tokens, UniFi credentials, or Cloudflare API key
 | ID | Type | Name | LAN IPv4 | Role |
 |---|---|---|---|---|
 | 100 | VM | haos | 192.168.1.209 | Home Assistant OS. `ssh ha`. 4G RAM, 2 cores, 32G disk |
-| 101 | VM | docker | 192.168.1.187 | Docker / DevPod / Frigate. `ssh docker`. 32G RAM, 16 cores, 100G disk |
+| 101 | VM | docker | 192.168.1.187 | Docker / DevPod / Frigate. `ssh docker`. 32G RAM, 16 cores (`cpu: host`), 100G disk |
 | 103 | LXC | cloudflare-ddns | 192.168.1.235 | Dynamic DNS (`k39.podval.org`). 3G disk. Binary `/usr/local/bin/cloudflare-ddns` + `/etc/cloudflare-ddns.env` (mode 600). Do **not** restore `go run …@latest` — that filled the disk |
 | 104 | LXC | cloudflared | 192.168.1.236 | Cloudflare Tunnel |
 | 105 | LXC | unifi-os-server | 192.168.1.184 | UniFi OS (controller). **Not** the switch at 192.168.1.245 |
@@ -64,17 +64,23 @@ HAOS USB passthrough (do not steal):
 - `303a:831a` Nabu Casa ZBT-2 (Zigbee)
 - `303a:4001` Nabu Casa ZWA-2 (Z-Wave)
 
-Docker VM hostname `docker`. **Do not attach virtiofs** — it hangs UEFI boot (QEMU up, 0 disk reads, no guest agent). Frigate lives on the host at `/mnt/data/apps/frigate` (compose, config, storage). NFS-exported to `192.168.1.187` only (`/etc/exports`). Guest mounts that at `/frigate`. Container binds `/frigate/config` and `/frigate/storage`, `restart: unless-stopped`. Directory mapping `docker-shared` still exists but is unused.
+Docker VM hostname `docker`. **Does not use virtiofs** (no `virtiofs` / `fsN` in `101.conf`). **Do not attach it** — it hangs UEFI boot. Frigate is NFS from `/mnt/data/apps/frigate` to `192.168.1.187` only; guest mounts `/frigate`.
 
 ## Storage and host
 
-- Hardware: i9-12900K (24 threads), 64G RAM, boot NVMe `KINGSTON SKC3000D2048G`.
+- Hardware: i9-12900K (24 threads), 64G RAM, boot NVMe `KINGSTON SKC3000D2048G`. Host iGPU: Intel AlderLake-S GT1, `/dev/dri/renderD128` on the **hypervisor** (not passed to 101).
 - Bridge: `vmbr0` on `enp3s0`, `192.168.1.40/24`, gw `192.168.1.1`.
 - PVE storage: `local` (dir `/var/lib/vz`, ISO/backup) and `local-lvm` (thin pool `pve/data` on the NVMe).
-- `/mnt/store` — 1T ext4 thin LV (`pve/store`). Media copy; **~85% full**.
-- `/mnt/data` — Btrfs RAID1 label `Big Data` on `/dev/sdc`+`/dev/sdd` (2×4T WD Red). Intended photo/media store. Virtiofs source. **~22% used**.
-- `sda`/`sdb` (2×2T WD) still have leftover `md127` labeled `/mnt/data` but it is **not mounted**. Do not assemble.
-- `sde` (500G) looks like an old backup disk; not mounted.
+- `/mnt/store` — 1T ext4 thin LV (`pve/store`) **on the same thin pool as the VMs**. Media copy; **~85% full**. Filling it can make the pool read-only and stall guests.
+- `/mnt/data` — Btrfs RAID1 label `Big Data` on `/dev/sdc`+`/dev/sdd` (2×4T WD Red). Photo/media + Frigate NFS source. **~22% used**.
+- `sda`/`sdb` (2×2T WD): leftover `md127` superblocks. Array is **stopped** and ignored in `mdadm.conf`. Superblocks not wiped.
+- `sde` (500G) old backup disk; not mounted. No vzdump/PBS jobs; `/var/lib/vz/dump` is empty.
+
+### Later (do not start unless asked)
+
+- **Prune `/mnt/store`** (or move media to `/mnt/data`) so the thin pool cannot fill.
+- **Backups**: scheduled `vzdump` of 100/101/105 (and the small LXC if wanted) onto `sde` or PBS — not onto `local-lvm` next to the guests.
+- **iGPU for Frigate**: pass the host Alder Lake GT1 into VM 101, then `/dev/dri/renderD128` in compose + `ffmpeg.hwaccel_args`. Not needed for one 480p doorbell.
 
 ## First move in a new session
 

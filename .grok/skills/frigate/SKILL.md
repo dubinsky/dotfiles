@@ -54,20 +54,27 @@ Do not print `.env`, `config/.jwt_secret`, RTSP passwords, or `FRIGATE_*` values
 ## Layout (re-check on disk)
 
 ```
-/mnt/data/apps/frigate/
-  compose.yml          # restart: unless-stopped; binds /frigate/config and /frigate/storage
-  .env                 # FRIGATE_DOORBELL_PASSWORD, FRIGATE_RTSP_PASSWORD, FRIGATE_MQTT_PASSWORD
-  config/config.yaml   # cameras + go2rtc
-  storage/             # recordings
+/mnt/data/apps/frigate/          # PVE NFS; docker mounts this at /frigate
+  compose.yml                    # restart: unless-stopped; binds config + storage
+  .env                           # FRIGATE_DOORBELL_PASSWORD, FRIGATE_MQTT_PASSWORD (not yadm)
+  config/config.yaml             # cameras + go2rtc (placeholders only)
+  config/*.bak.*                 # timestamped local copies after edits
+  storage/                       # recordings, clips, snapshots
 ```
 
-NFS export (PVE `/etc/exports`): `/mnt/data/apps/frigate` → `192.168.1.187` only.
+NFS export (PVE `/etc/exports`): `/mnt/data/apps/frigate` → `192.168.1.187` only. This tree is **not** in yadm and **not** in HA Google Drive Backup. Safe to copy off-box: `compose.yml` and `config/config.yaml` (secrets are `{FRIGATE_*}` placeholders). Never copy `.env`, `config/.jwt_secret`, or `config/frigate.db*`. Today the only backups are those `.bak.*` files on the same share. Later (do not start unless asked): include this dataset in PVE/PBS, or rsync the two safe files somewhere tracked.
 
-Container: `ghcr.io/blakeblackshear/frigate:stable`, no Coral/GPU devices. Ports `8971`, `8554` (go2rtc RTSP), `8555` WebRTC.
+Container: `ghcr.io/blakeblackshear/frigate:stable`, no Coral/GPU. Ports `8971`, `8554` (go2rtc RTSP), `8555` WebRTC.
+
+### iGPU / `/dev/dri` (not in use)
+
+`/dev/dri/renderD128` is the render node ffmpeg uses for VAAPI/QSV. VM 101 only has QEMU stdvga (`1234:1111`) and `/dev/dri/card0` — that is **not** an iGPU. Using hwaccel means: confirm an Intel/AMD iGPU on the PVE host (`lspci`), pass it through to VM 101 (PCI or mediated), then uncomment `/dev/dri/renderD128` in `compose.yml` and set `ffmpeg.hwaccel_args` (e.g. `preset-vaapi`). Do not confuse this with virtiofs (forbidden on this VM). One 480×640 doorbell at 5 fps is fine on CPU (~10 ms inference); add the iGPU when there are more cameras. Do not start unless asked.
 
 ## Cameras (last inventoried)
 
-One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). HTTP is enabled on the camera. go2rtc video is HTTP-FLV (`channel0_main.bcs` / `channel0_ext.bcs`); two-way talk is a second source `rtsp://…/Preview_01_sub` (no `ffmpeg:` prefix). Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*`. Detect 480×640 on the sub stream; record+audio on main. Recording is enabled: keep motion segments 7 days, alerts/detections 14 days (`mode: motion`). `.203` is stale. Do not URL-encode the doorbell password in the FLV query string.
+One camera: **doorbell** (Reolink hostname `Front`, MAC `c4:8b:66:0e:97:21`, UniFi reservation `192.168.1.110`). HTTP is enabled on the camera. go2rtc video is HTTP-FLV (`channel0_main.bcs` / `channel0_ext.bcs`). Two-way talk is **only** on `doorbell_sub` (`rtsp://…/Preview_01_sub`, no `ffmpeg:` prefix) — that is the stream the HA card uses. Do not put talk on `doorbell_main` (one backchannel). Frigate consumes `rtsp://127.0.0.1:8554/doorbell_*`. Detect **on**, 480×640 on the sub stream; record+audio on main. Review **alerts = person only**. Recording: motion 7 days, alerts/detections 14 days. Snapshots 14 days. Button press is Reolink; HA `frigate.create_event` (`visitor`, 30s) plus notify image `/api/frigate/notifications/<event_id>/snapshot.jpg`. Person notify uses `/api/frigate/doorbell/person/snapshot.jpg`. `.203` is stale. Do not URL-encode the doorbell password in the FLV query string.
+
+**Later (do not start unless asked): a `stoop` zone** covering the porch, not the street/sidewalk, then `review.alerts.required_zones: [stoop]` so sidewalk traffic is not an alert.
 
 ## First move in a new session
 

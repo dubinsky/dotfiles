@@ -57,13 +57,22 @@ Do **not** retry curl-to-Core, mint a long-lived token, or switch to Advanced SS
 
 ## Config shape (2026-08)
 
-`configuration.yaml` is stock: `default_config` plus includes for automations/scripts/scenes. **No `packages/`**, **no `/config/esphome/`**. Scripts file is empty. Logic is almost all UI-created YAML plus **Node-RED** (`/addon_configs/a0d7b954_nodered/flows.json`). Check Node-RED before duplicating a flow.
+`configuration.yaml` is stock: `default_config` plus includes for automations/scripts/scenes, plus a YAML **notify action group** `notify.phones` (Pixel 10 / Pixel 8 / Pixel 8 Remote). **No `packages/`**, **no `/config/esphome/`**. Scripts file is empty. Logic is YAML automations. **Node-RED is installed but stopped** (`boot: manual`, empty flow). Check it is still empty before adding YAML that might duplicate a future flow.
 
-Add-ons (started when last inventoried): Z-Wave JS, Terminal & SSH 10.3.0, Mosquitto, File editor, MQTT Explorer, Google Drive Backup, Node-RED, rtl_433 (next), rtl_433 MQTT Auto Discovery. Custom component: HACS only.
+Add-ons **started**: Z-Wave JS, Terminal & SSH 10.3.0, Mosquitto, Google Drive Backup, rtl_433 (next). **Stopped, boot manual** (start from the UI if you need them): File editor, MQTT Explorer, Node-RED, rtl_433 MQTT Auto Discovery. Custom: HACS + Frigate integration 5.15.4. Advanced Camera Card is files under `/config/www/advanced-camera-card/` (not HACS).
 
-Core was **2026.8.1** on qemux86-64 (HAOS VM). Hostnames: `homeassistant.local`, `homeassistant.lan.podval.org`. **Not** 192.168.1.245 (that's the UniFi switch). Core HTTP is `:8123` with `ssl: false`. Doorbell talk/mic needs a secure context; today that means Nabu Casa. **Later (do not start unless asked): local HTTPS** so talk works on the LAN without Nabu Casa.
+Core **2026.8.2** on qemux86-64 (HAOS 18.2 VM 100). Hostnames: `homeassistant.local`, `homeassistant.lan.podval.org`. **Not** 192.168.1.245 (that's the UniFi switch). Core HTTP is `:8123` with `ssl: false`. Doorbell talk/mic needs a secure context; today that means Nabu Casa.
 
-`rtl_433/next.conf.template`: MQTT to `homeassistant:1883`, protocol 20 only (Ambient Weather F007TH).
+`rtl_433/next.conf.template`: protocol 20 only (Ambient Weather F007TH), `verbose 4`. MQTT host/user/pass come from the add-on's `mqtt:want` service (`${host}` `${username}` `${password}` `${retain}`) — do not put broker credentials in the template. Auto Discovery is **stopped**; the three named sensors already exist (boiler `2-234`, garage `1-55`, deck `3-219`). Start Auto Discovery only if a real sensor gets a new ID (battery change), then stop it again so neighbor F007THs are not re-created.
+
+## Later (do not start unless asked)
+
+- **Local HTTPS** so Talk works on the LAN without Nabu Casa.
+- **Smoke / CO + garden leak notify** — sensors exist, no automation yet. Attic Zooz ZEN55: `binary_sensor.attic_fire_sensor_smoke_detected`, `binary_sensor.attic_fire_sensor_carbon_monoxide_detected`. Garden SONOFF SWV: `binary_sensor.sonoff_swv_water_leak`. Send `notify.phones` (`ttl: 0`, `priority: high`), distinct titles. Do not page on `binary_sensor.attic_fire_sensor_idle`.
+- **Advanced Camera Card via HACS** so it gets updates. Today it is unpacked under `/config/www/advanced-camera-card/` (v7.27.4). `lovelace_resources` is what actually loads it; `frontend.extra_module_url` in `configuration.yaml` is leftover and can go once HACS owns the resource.
+- **Official Z-Wave JS → Z-Wave JS UI** if you want a network graph, heal, and per-node debug. Current official add-on is fine for the Zooz/T6 set. Follow HA's switch doc (do not run both add-ons). https://www.home-assistant.io/integrations/zwave_js/#how-do-i-switch-between-the-official-z-wave-js-add-on-and-the-z-wave-js-ui-add-on
+- **Watchman + battery status** — [Watchman](https://github.com/dummylabs/thewatchman) for a weekly unavailable-entity report. Separate low-battery notify to `notify.phones` for the real cells: eight SNZB-02D `sensor.sonoff_snzb_02d_battery*`, garden `sensor.sonoff_swv_battery`, T6 `sensor.t6_pro_z_wave_programmable_thermostat_battery_level` / `binary_sensor.t6_pro_z_wave_programmable_thermostat_low_battery_level`, F007TH keepers only (`sensor.ambientweather_234_battery`, `sensor.ambientweather_f007th_1_55_battery`, `sensor.ambientweather_f007th_3_219_battery`). Skip phone battery entities.
+- **Floor plan** dashboard. Draw in Sweet Home 3D / RoomSketcher / FreeCAD; integrate with ha-floorplan / floorplan_3d / home-assistant-floor-plan (links in the human note). Not required for current automations.
 
 ## Automations style
 
@@ -72,8 +81,8 @@ Match `automations.yaml`: list of maps, `id`, `alias`, modern `triggers:` / `act
 Existing YAML automations (do not clobber):
 
 - Tag Shabbos Lights → `scene.master_bedroom_shabbos_scene`
-- Refrigerator Shabbos Mode Toggle (device action, not a clean entity_id)
-- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → `notify.mobile_app_pixel_10`. **Talk** opens YAML dashboard `/lovelace-doorbell/talk` (Advanced Camera Card 7.27.4 at `/config/www/advanced-camera-card/`, go2rtc `doorbell_sub` WebRTC + mic). **Reolink** still opens the app as fallback. HA must be **https** (Nabu Casa) for the browser mic. Keep Reolink for the chime; disable Reolink camera entities.
+- Refrigerator Shabbos Mode Toggle — tag `96c806d9-d374-4af9-9675-36defd91f1f2` (`tag.refrigerator_shabbos_mode`) → `switch.toggle` on `switch.refrigerator_sabbath_mode`
+- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → **`notify.phones`** (Pixel 10 + Pixel 8 + Pixel 8 Remote). On **button**, `frigate.create_event` (`visitor`, 30s) and the notify image is `/api/frigate/notifications/<event_id>/snapshot.jpg`. Person image is `/api/frigate/doorbell/person/snapshot.jpg`. **Talk** opens `/lovelace-doorbell/talk`. HA must be **https** (Nabu Casa) for the browser mic. Keep Reolink for the chime; disable Reolink camera entities. `notify.phones` is a YAML **action** group (not a UI notify-entity helper) so Android extras still pass through.
 - **Bathroom fan auto-off** (one automation per fan, `mode: restart`, 15 min) — do not combine into one automation; `mode: restart` is per-automation, not per entity:
   - `fan.master_bathroom_fan`
   - `fan.bathroom_fan` (UI name Bathroom Fan; helper over `switch.1st_floor_bathroom_fan`)
@@ -90,7 +99,7 @@ Those fan devices also have disabled Z-Wave `number.*_auto_turn_off_timer` confi
 - Climate: `climate.t6_pro_z_wave_programmable_thermostat`
 - Boiler: `sensor.e3_vitodens_100_na_0521_*`
 - Doorbell button/chime (Reolink): `binary_sensor.front_door_visitor`, `number.reolink_chime_*`. Video/person (Frigate): `camera.doorbell`, `binary_sensor.doorbell_person_occupancy`. Disable `camera.front_door_fluent`.
-- Phones: `device_tracker.pixel_10`, `notify.mobile_app_pixel_10`
+- Phones: `device_tracker.pixel_10`, `notify.phones` (group). Singles: `notify.mobile_app_pixel_10` / `notify.pixel_10` (and Pixel 8 / Pixel 8 Remote). `person.mqtt` is leftover from Mosquitto onboarding — delete in **Settings → People** (this jail cannot write `.storage/person`). After that, the HA login user `mqtt` can go too; rtl_433 no longer uses it.
 
 ~700 enabled entities, ~2600 registered. Many lights still have generic ids (`light.dimmer`, `light.light`). Use the registry `original_name` / `name` to disambiguate.
 
