@@ -5,3 +5,4 @@ OpenTorah/Keys/**
 CognoMath/Keys/**
 .grok/skills/unifi/api.key
 .config/rclone/rclone.conf
+.grok/skills/home-assistant/api.token

@@ -108,7 +108,13 @@ One useful site: `default` (“Default”). LAN `192.168.1.1/24`. Public WAN on 
 | usw | US8P60 | US 8 60W | 192.168.1.210 |
 | usw | USPM24P | USW Pro Max 24 PoE | 192.168.1.245 |
 
-WLANs (do not print keys): `podval-u` is **5 GHz only** (people); `podval-2g` is **2.4 GHz IoT**. One LAN, no extra VLANs. DHCP pool `192.168.1.100–199`.
+WLANs (do not print keys): `podval-u` is people Wi‑Fi, currently **2.4 + 5 GHz** so the Samsung fridge can stay online (2.4-only, still on this SSID at `.113`). `podval-2g` is **2.4 GHz IoT** (boiler, dishwasher). One LAN, no extra VLANs. DHCP pool `192.168.1.100–199`.
+
+### Later (do not start unless asked)
+
+- **Move refrigerator to `podval-2g`.** SmartThings has no Wi‑Fi picker for this fridge. AP path (Door Alarm, hold Fridge until `AP`) **tried 2026-08-19 and failed**. Next try: **power the fridge off** (or unplug a minute), then AP again; phone on `podval-2g`; Reclaim if “already registered”. Do not delete the device in SmartThings first.
+- **ratgdo** `.240` is already on `podval-2g` (moved 2026-08-19 by OTA; same DHCP reservation). Firmware ESPHome **2024.8.3** — do not bump to current `esphome-ratgdo` (needs 2026.4+ and API encryption; would break HA). See HA skill.
+- Then set `podval-u` back to **5 GHz only** (disable 2.4 on that SSID). Confirm UniFi shows `refrigerator` on `podval-2g` first.
 
 ## First move in a new session
 

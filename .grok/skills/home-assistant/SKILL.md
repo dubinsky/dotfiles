@@ -45,7 +45,26 @@ Do not copy or print `secrets.yaml` values or Supervisor tokens (`set -x` will l
 
 `core_ssh` has `hassio_api: true` / `hassio_role: manager` and **`homeassistant_api: false`**. That is the official add-on manifest (not a user option). `SUPERVISOR_TOKEN` is present and works for **Supervisor** (`ha core info`, `ha core check`, `http://supervisor/info` → 200). The same bearer against **Core** (`http://supervisor/core/api/…`) is **401**. Protection mode is on; there is no Docker socket, so we cannot exec into the Core container either.
 
-Do **not** retry curl-to-Core, mint a long-lived token, or switch to Advanced SSH unless the user asks. After YAML edits: `ha core check`, then tell the user to **Developer tools → YAML → Automations → Reload** (or toggle the automation). Need live state / last_triggered / notify: `scp` `/config/home-assistant_v2.db` and query it locally.
+There is **no browser tool** in Grok Build for clicking the HA UI. Reload and live Core calls use a **long-lived access token** (same idea as the UniFi API key):
+
+| | |
+|---|---|
+| URL | `~/.grok/skills/home-assistant/api.env` (`HA_URL=http://192.168.1.209:8123`) |
+| Secret | `~/.grok/skills/home-assistant/api.token` (mode 600, gitignored, yadm encrypt) |
+| Helper | `~/.grok/scripts/ha-api` (not on PATH). Default: `POST /api/services/automation/reload` |
+
+Create the token in the UI (shown once): **http://192.168.1.209:8123/profile/security** (or profile → Security) → **Long-lived access tokens** → Create → name `grok`. Put only the token in `api.token`. Then `yadm encrypt`. Do not paste the token into chat. `set -x` will leak it.
+
+```bash
+set +x
+~/.grok/scripts/ha-api                  # reload automations
+~/.grok/scripts/ha-api script.reload
+~/.grok/scripts/ha-api GET /api/config
+```
+
+If `api.token` is missing, after YAML edits: `ha core check`, then tell the user to **Developer tools → YAML → Automations → Reload**. Need last_triggered without Core API: `scp` `/config/home-assistant_v2.db` and query it locally.
+
+Do **not** retry Supervisor-token curl-to-Core (still 401). Do not switch to Advanced SSH unless asked.
 
 ## Safety
 
@@ -67,6 +86,8 @@ Core **2026.8.2** on qemux86-64 (HAOS 18.2 VM 100). Hostnames: `homeassistant.lo
 
 ## Later (do not start unless asked)
 
+- **Move Samsung fridge to `podval-2g`**, then set `podval-u` back to 5 GHz only. Fridge is 2.4-only and still on `podval-u` (`.113`). SmartThings app has no Wi‑Fi setting. AP path tried 2026-08-19 and failed; next try is power-cycle the fridge then AP (Reclaim, do not delete the device). **ratgdo `.240` is already on `podval-2g`.** Details in the UniFi skill.
+- **Do not bump ratgdo firmware** unless there is a specific bug to fix. Board is v2.5i (`cover.ratgdov25i_0bd4e4_door`), ESPHome **2024.8.3** (Wi‑Fi OTA 2026-08-19), API **unencrypted**, web UI `http://192.168.1.240`. Current `esphome-ratgdo` main wants ESPHome **2026.4+** and an **API encryption key** — a stock flash would drop HA until a key is in YAML and the integration. ESP8266 OTA space is tight; 2026.1/2026.2 had handshake breakages. If you ever update: pin a release, compile with a noise key + `wifi.use_address: 192.168.1.240`, OTA from the web UI, USB-ready if OTA fails. Do not use the unsigned web installer over the working board.
 - **Local HTTPS** so Talk works on the LAN without Nabu Casa.
 - **Smoke / CO + garden leak notify** — sensors exist, no automation yet. Attic Zooz ZEN55: `binary_sensor.attic_fire_sensor_smoke_detected`, `binary_sensor.attic_fire_sensor_carbon_monoxide_detected`. Garden SONOFF SWV: `binary_sensor.sonoff_swv_water_leak`. Send `notify.phones` (`ttl: 0`, `priority: high`), distinct titles. Do not page on `binary_sensor.attic_fire_sensor_idle`.
 - **Advanced Camera Card via HACS** so it gets updates. Today it is unpacked under `/config/www/advanced-camera-card/` (v7.27.4). `lovelace_resources` is what actually loads it; `frontend.extra_module_url` in `configuration.yaml` is leftover and can go once HACS owns the resource.
@@ -82,7 +103,7 @@ Existing YAML automations (do not clobber):
 
 - Tag Shabbos Lights → `scene.master_bedroom_shabbos_scene`
 - Refrigerator Shabbos Mode Toggle — tag `96c806d9-d374-4af9-9675-36defd91f1f2` (`tag.refrigerator_shabbos_mode`) → `switch.toggle` on `switch.refrigerator_sabbath_mode`
-- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate `binary_sensor.doorbell_person_occupancy` → **`notify.phones`** (Pixel 10 + Pixel 8 + Pixel 8 Remote). On **button**, `frigate.create_event` (`visitor`, 30s) and the notify image is `/api/frigate/notifications/<event_id>/snapshot.jpg`. Person image is `/api/frigate/doorbell/person/snapshot.jpg`. **Talk** opens `/lovelace-doorbell/talk`. HA must be **https** (Nabu Casa) for the browser mic. Keep Reolink for the chime; disable Reolink camera entities. `notify.phones` is a YAML **action** group (not a UI notify-entity helper) so Android extras still pass through.
+- Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate **`binary_sensor.stoop_person_occupancy`** (person whose feet are in the `stoop` zone) → **`notify.phones`**. `binary_sensor.doorbell_person_occupancy` is still anyone in frame — do not use it for notify. On **button**, `frigate.create_event` (`visitor`, 30s). **Talk** `/lovelace-doorbell/talk`. Keep Reolink for the chime.
 - **Bathroom fan auto-off** (one automation per fan, `mode: restart`, 15 min) — do not combine into one automation; `mode: restart` is per-automation, not per entity:
   - `fan.master_bathroom_fan`
   - `fan.bathroom_fan` (UI name Bathroom Fan; helper over `switch.1st_floor_bathroom_fan`)
@@ -94,7 +115,7 @@ Those fan devices also have disabled Z-Wave `number.*_auto_turn_off_timer` confi
 
 ## Stable entities (re-check registry; these were enabled)
 
-- Garage: `cover.ratgdov25i_0bd4e4_door`
+- Garage: `cover.ratgdov25i_0bd4e4_door` (ratgdo v2.5i, `.240` on `podval-2g`, ESPHome 2024.8.3 — leave firmware)
 - Garden: `valve.back_garden_water`, `switch.sonoff_swv`
 - Climate: `climate.t6_pro_z_wave_programmable_thermostat`
 - Boiler: `sensor.e3_vitodens_100_na_0521_*`
@@ -107,4 +128,4 @@ Those fan devices also have disabled Z-Wave `number.*_auto_turn_off_timer` confi
 
 1. `ssh -o BatchMode=yes ha 'hostname; ha core info'` — confirm the tunnel.
 2. Inventory the files you will touch; don't dump the whole registry into chat.
-3. Edit, check, then ask the user to reload automations.
+3. Edit, `ha core check`, then `~/.grok/scripts/ha-api` (automation reload) if `api.token` exists. Otherwise ask the user to reload automations.

@@ -1,0 +1,45 @@
+#!/bin/bash
+# Call Home Assistant Core API from Grok Build. Not on PATH.
+# Usage:
+#   ~/.grok/scripts/ha-api                    # POST automation.reload
+#   ~/.grok/scripts/ha-api automation.reload
+#   ~/.grok/scripts/ha-api GET /api/config
+# Do not run with set -x (prints HA_TOKEN).
+set -euo pipefail
+set +x
+
+source "${HOME}/.grok/skills/home-assistant/api.env"
+if [[ -z "${HA_TOKEN:-}" ]]; then
+  echo "ha-api: missing ${HOME}/.grok/skills/home-assistant/api.token" >&2
+  exit 2
+fi
+
+out=/tmp/ha-api.out
+if [[ $# -eq 0 ]]; then
+  set -- POST /api/services/automation/reload '{}'
+elif [[ $# -eq 1 && "$1" != /* && "$1" != GET && "$1" != POST ]]; then
+  # domain.service → POST /api/services/domain/service
+  svc=$1
+  domain=${svc%%.*}
+  service=${svc#*.}
+  set -- POST "/api/services/${domain}/${service}" '{}'
+fi
+
+method=${1:-POST}
+path=${2:-/api/services/automation/reload}
+# Do not use ${body:-{}} — bash parses that as default "{" plus a stray "}".
+body=${3:-'{}'}
+
+args=(-sS -o "$out" -w '%{http_code}' -H "Authorization: Bearer ${HA_TOKEN}" -H 'Accept: application/json')
+if [[ "$method" == POST ]]; then
+  args+=(-H 'Content-Type: application/json' -d "$body")
+fi
+
+code=$(curl "${args[@]}" -X "$method" "${HA_URL}${path}")
+echo "$code"
+if [[ "$code" != 200 && "$code" != 201 ]]; then
+  echo "ha-api: ${method} ${path} -> ${code}" >&2
+  head -c 400 "$out" >&2 || true
+  echo >&2
+  exit 1
+fi
