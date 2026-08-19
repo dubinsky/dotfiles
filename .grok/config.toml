@@ -34,6 +34,8 @@ command = "npx"
 args = [
     "-y",
     "@playwright/mcp@latest",
+    "--executable-path",
+    "/usr/bin/chromium",
 ]
 enabled = true
 startup_timeout_sec = 120
