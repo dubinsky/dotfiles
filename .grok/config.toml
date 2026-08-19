@@ -28,3 +28,12 @@ default = "grok-build"
 
 [privacy]
 privacy_banner_acked = "2026-08-17T16:17:02Z"
+
+[mcp_servers.playwright]
+command = "npx"
+args = [
+    "-y",
+    "@playwright/mcp@latest",
+]
+enabled = true
+startup_timeout_sec = 120
