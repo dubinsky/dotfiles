@@ -80,7 +80,7 @@ Docker VM hostname `docker`. **Does not use virtiofs** (no `virtiofs` / `fsN` in
 
 - **Prune `/mnt/store`** (or move media to `/mnt/data`) so the thin pool cannot fill.
 - **Backups**: scheduled `vzdump` of 100/101/105 (and the small LXC if wanted) onto `sde` or PBS — not onto `local-lvm` next to the guests.
-- **iGPU for Frigate**: pass the host Alder Lake GT1 into VM 101, then `/dev/dri/renderD128` in compose + `ffmpeg.hwaccel_args`. Not needed for one 480p doorbell.
+- **iGPU for Frigate**: planned, **do not execute** until asked. Canonical steps: `~/Podval/dub.podval.org/notes/SystemAdministration/Frigate.md` (§ iGPU passthrough). Host GPU `8086:4680` `00:02.0` is alone in IOMMU group 0; VM 101 is still i440fx. Needs a PVE reboot (all guests). No virtiofs.
 
 ## First move in a new session
 
