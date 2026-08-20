@@ -101,8 +101,8 @@ Match `automations.yaml`: list of maps, `id`, `alias`, modern `triggers:` / `act
 
 Existing YAML automations (do not clobber):
 
-- Tag Shabbos Lights → `scene.master_bedroom_shabbos_scene`
-- Refrigerator Shabbos Mode Toggle — tag `96c806d9-d374-4af9-9675-36defd91f1f2` (`tag.refrigerator_shabbos_mode`) → `switch.toggle` on `switch.refrigerator_sabbath_mode`
+- **Shabbos/Yom Tov** — tag `tag.shabbos_yom_tov` (`3ef26f62-ef32-4d27-b819-1abf66dfa0ee`) **and** automation `shabbos_yom_tov_scene_before_sunset` (`sensor.jewish_calendar_sunset_shkia` − 40 min, only if `upcoming_candle_lighting` is still ahead and within 2½ h) both `scene.turn_on` **`scene.shabbos_scene`**. That scene: master bedroom Shabbos lights + `switch.refrigerator_sabbath_mode` **on**. No fridge tag (`tag.refrigerator_shabbos_mode` was removed). Do not use `scene.master_bedroom_shabbos_scene`.
+- Scenes YAML also has `scene.night` and `scene.day` (Day currently matches Night). Living Room is `light.s2_dimmer` (not `light.light_2`). Master bedroom on/off light is `light.master_bedroom_light` (not hidden `switch.background_light`).
 - Doorbell Notification → Reolink `binary_sensor.front_door_visitor` (button) or Frigate **`binary_sensor.stoop_person_occupancy`** (person whose feet are in the `stoop` zone) → **`notify.phones`**. `binary_sensor.doorbell_person_occupancy` is still anyone in frame — do not use it for notify. On **button**, `frigate.create_event` (`visitor`, 30s). **Talk** `/lovelace-doorbell/talk`. Keep Reolink for the chime.
 - **Bathroom fan auto-off** (one automation per fan, `mode: restart`, 15 min) — do not combine into one automation; `mode: restart` is per-automation, not per entity:
   - `fan.master_bathroom_fan`
