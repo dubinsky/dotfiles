@@ -50,7 +50,7 @@ ssh -o BatchMode=yes unifi '…'
 
 Fallback: `ssh -o BatchMode=yes pve 'pct exec 105 -- …'`
 
-YubiKey: `yk-tap` for `unifi` or `pve` (user rule). UI is `:11443`, not `:8443`. **192.168.1.245** is the switch, not the controller.
+YubiKey: `yk-tap` for `unifi` or `pve` (user rule). UI is `:11443`, not `:8443`. **192.168.1.101** is the switch, not the controller.
 
 Inside the UniFi OS **podman** container (Network app + mongo):
 
