@@ -45,7 +45,7 @@ There is **no browser tool** in Grok Build for clicking the HA UI. Reload and li
 |---|---|
 | URL | `~/.grok/skills/home-assistant/api.env` (`HA_URL=http://192.168.1.209:8123`) |
 | Secret | `~/.grok/skills/home-assistant/api.token` (mode 600, gitignored, yadm encrypt) |
-| Helper | `~/.grok/scripts/ha-api` (not on PATH). Default: `POST /api/services/automation/reload` |
+| Helpers | `~/.grok/scripts/ha-api` (REST; default automation reload) and `~/.grok/scripts/ha-ws` (WebSocket registry). Neither on PATH. |
 
 Create the token in the UI (shown once): **http://192.168.1.209:8123/profile/security** → **Long-lived access tokens** → Create → name `grok`. Put only the token in `api.token`. Then `yadm encrypt`. Do not paste the token into chat. `set -x` will leak it.
 
@@ -55,6 +55,24 @@ set +x
 ~/.grok/scripts/ha-api script.reload
 ~/.grok/scripts/ha-api GET /api/config
 ```
+
+`ha-api` is **REST only**. It covers states, `/api/config`, services, and config-entry **options flows** (`POST /api/config/config_entries/options/flow` with `{"handler":"<entry_id>"}`). Entity/device registry REST paths **404**. Rename, area, `new_entity_id`, device `name_by_user`: WebSocket via `~/.grok/scripts/ha-ws` (not on PATH; this machine has no `websockets` / `websocket-client`).
+
+```bash
+set +x
+~/.grok/scripts/ha-ws config/entity_registry/get '{"entity_id":"sun.sun"}'
+~/.grok/scripts/ha-ws config/entity_registry/update '{"entity_id":"media_player.foo","name":"Foo","new_entity_id":"media_player.foo"}'
+~/.grok/scripts/ha-ws config/device_registry/update '{"device_id":"<id>","area_id":"<area>","name_by_user":"Foo"}'
+```
+
+Do not write `.storage/` to change registry. After a WS update, trust the API (`ha-ws` / `/api/states`); a just-`scp`'d `core.entity_registry` can still be the pre-write file.
+
+Do not reimplement the handshake in a one-off. Traps if you must:
+
+- `source api.env` does not `export`. Inline Python `os.environ` is empty unless `set -a` first. `ha-api` / `ha-ws` load the files themselves.
+- Handshake needs `Origin: $HA_URL` **and** leftover bytes after the HTTP 101 headers (`auth_required` is often in the same packet). Drop them and the socket closes.
+- Client frames must be masked. Wait for `auth_required`, then `{"type":"auth","access_token":...}`.
+- Options-flow forms follow HA selectors: `multiple` fields are JSON **lists**, expandable groups are **nested** objects (flattened keys 400).
 
 If `api.token` is missing, after YAML edits: `ha core check`, then tell the user to **Developer tools → YAML → Automations → Reload**. Need last_triggered without Core API: `scp` `/config/home-assistant_v2.db` and query it locally.
 

@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Call Home Assistant Core WebSocket from Grok Build. Not on PATH.
+
+Usage:
+  ~/.grok/scripts/ha-ws config/entity_registry/get '{"entity_id":"sun.sun"}'
+  ~/.grok/scripts/ha-ws '{"type":"config/device_registry/list"}'
+
+REST (states, services, options flows) is ~/.grok/scripts/ha-api.
+Do not run with set -x (prints HA_TOKEN).
+"""
+from __future__ import annotations
+
+import json
+import os
+import socket
+import sys
+from pathlib import Path
+
+SKILL = Path.home() / ".grok/skills/home-assistant"
+OUT = Path("/tmp/ha-ws.out")
+
+
+def load_auth() -> tuple[str, str]:
+    env = SKILL / "api.env"
+    token_path = SKILL / "api.token"
+    url = None
+    for line in env.read_text().splitlines():
+        if line.startswith("HA_URL="):
+            url = line.split("=", 1)[1].strip().strip("'\"")
+            break
+    token = token_path.read_text().strip() if token_path.exists() else ""
+    if not url or not token:
+        sys.stderr.write(f"ha-ws: missing {env} or {token_path}\n")
+        sys.exit(2)
+    return url, token
+
+
+class WS:
+    def __init__(self, sock: socket.socket):
+        self.sock = sock
+        self.buf = b""
+
+    def read(self, n: int) -> bytes:
+        while len(self.buf) < n:
+            chunk = self.sock.recv(4096)
+            if not chunk:
+                raise EOFError("ha-ws: socket closed")
+            self.buf += chunk
+        out, self.buf = self.buf[:n], self.buf[n:]
+        return out
+
+    def send_text(self, payload: str) -> None:
+        data = payload.encode()
+        mask = os.urandom(4)
+        header = bytearray([0x81])
+        n = len(data)
+        if n < 126:
+            header.append(0x80 | n)
+        elif n < 65536:
+            header.append(0x80 | 126)
+            header.extend(n.to_bytes(2, "big"))
+        else:
+            header.append(0x80 | 127)
+            header.extend(n.to_bytes(8, "big"))
+        masked = bytes(b ^ mask[i % 4] for i, b in enumerate(data))
+        self.sock.sendall(header + mask + masked)
+
+    def recv_frame(self) -> tuple[int, bytes]:
+        hdr = self.read(2)
+        opcode, masked, ln = hdr[0] & 0x0F, hdr[1] & 0x80, hdr[1] & 0x7F
+        if ln == 126:
+            ln = int.from_bytes(self.read(2), "big")
+        elif ln == 127:
+            ln = int.from_bytes(self.read(8), "big")
+        if masked:
+            mask = self.read(4)
+            data = bytes(b ^ mask[i % 4] for i, b in enumerate(self.read(ln)))
+        else:
+            data = self.read(ln)
+        return opcode, data
+
+    def recv_json(self) -> dict:
+        while True:
+            opcode, data = self.recv_frame()
+            if opcode == 0x1:
+                return json.loads(data)
+            if opcode == 0x8:
+                raise EOFError("ha-ws: close")
+            if opcode == 0x9:
+                # pong
+                mask = os.urandom(4)
+                hdr = bytearray([0x8A, 0x80 | len(data)])
+                masked = bytes(b ^ mask[i % 4] for i, b in enumerate(data))
+                self.sock.sendall(hdr + mask + masked)
+
+
+def parse_args(argv: list[str]) -> list[dict]:
+    if not argv:
+        sys.stderr.write(
+            "usage: ha-ws <type> '<fields json>'\n"
+            "       ha-ws '<full message json>'\n"
+        )
+        sys.exit(2)
+    if argv[0].lstrip().startswith("{"):
+        return [json.loads(a) for a in argv]
+    msg = {"type": argv[0]}
+    if len(argv) > 1:
+        fields = json.loads(argv[1])
+        if not isinstance(fields, dict):
+            sys.stderr.write("ha-ws: fields must be a JSON object\n")
+            sys.exit(2)
+        msg.update(fields)
+        extra = argv[2:]
+    else:
+        extra = []
+    msgs = [msg]
+    msgs.extend(json.loads(a) for a in extra)
+    return msgs
+
+
+def connect(url: str, token: str) -> WS:
+    if not url.startswith("http://"):
+        sys.stderr.write("ha-ws: only http:// HA_URL is supported\n")
+        sys.exit(2)
+    host, port_s = url[len("http://") :].rsplit(":", 1)
+    port = int(port_s)
+    key = os.urandom(16)
+    import base64
+
+    req = (
+        f"GET /api/websocket HTTP/1.1\r\n"
+        f"Host: {host}:{port}\r\n"
+        f"Upgrade: websocket\r\n"
+        f"Connection: Upgrade\r\n"
+        f"Sec-WebSocket-Key: {base64.b64encode(key).decode()}\r\n"
+        f"Sec-WebSocket-Version: 13\r\n"
+        f"Origin: {url}\r\n"
+        f"Authorization: Bearer {token}\r\n"
+        f"\r\n"
+    )
+    sock = socket.create_connection((host, port), timeout=20)
+    sock.sendall(req.encode())
+    ws = WS(sock)
+    while b"\r\n\r\n" not in ws.buf:
+        chunk = sock.recv(4096)
+        if not chunk:
+            raise EOFError("ha-ws: no handshake")
+        ws.buf += chunk
+    header, ws.buf = ws.buf.split(b"\r\n\r\n", 1)
+    status = header.split(b"\r\n", 1)[0]
+    if b"101" not in status:
+        sock.close()
+        sys.stderr.write(f"ha-ws: handshake failed: {status.decode()}\n")
+        sys.exit(1)
+    hello = ws.recv_json()
+    if hello.get("type") != "auth_required":
+        sys.stderr.write(f"ha-ws: expected auth_required, got {hello.get('type')}\n")
+        sys.exit(1)
+    ws.send_text(json.dumps({"type": "auth", "access_token": token}))
+    auth = ws.recv_json()
+    if auth.get("type") != "auth_ok":
+        sys.stderr.write(f"ha-ws: auth failed ({auth.get('type')}: {auth.get('message')})\n")
+        sys.exit(1)
+    return ws
+
+
+def main() -> int:
+    os.environ.pop("PYTHONUNBUFFERED", None)
+    url, token = load_auth()
+    msgs = parse_args(sys.argv[1:])
+    ws = connect(url, token)
+    results = []
+    msgid = 0
+    failed = False
+    try:
+        for payload in msgs:
+            msgid += 1
+            payload = dict(payload)
+            payload["id"] = msgid
+            ws.send_text(json.dumps(payload))
+            while True:
+                msg = ws.recv_json()
+                if msg.get("id") != msgid:
+                    continue
+                results.append(msg)
+                if not msg.get("success", False):
+                    failed = True
+                    err = msg.get("error") or {}
+                    sys.stderr.write(
+                        f"ha-ws: {payload.get('type')} -> {err.get('code')} {err.get('message')}\n"
+                    )
+                break
+    finally:
+        try:
+            ws.sock.close()
+        except Exception:
+            pass
+    text = json.dumps(results if len(results) != 1 else results[0], indent=2, default=str)
+    OUT.write_text(text + "\n")
+    sys.stdout.write(text + "\n")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except (EOFError, OSError, json.JSONDecodeError, ValueError) as e:
+        sys.stderr.write(f"ha-ws: {e}\n")
+        sys.exit(1)
