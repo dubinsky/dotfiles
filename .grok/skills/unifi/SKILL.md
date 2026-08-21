@@ -15,9 +15,11 @@ Grok Build is a **config engineer**, not the UniFi phone app. Prefer the **local
 
 There is no UniFi MCP.
 
+House facts (controller, devices, WLANs, fridge move): `~/Podval/dub.podval.org/notes/SystemAdministration/UniFi.md`. Read it before changing Wi‑Fi or LAN. **Do not start** the refrigerator/`podval-u` 5 GHz cutover unless the user asks. ratgdo firmware: Home Assistant note — do not bump it from here.
+
 ## Local API (preferred)
 
-Non-secret URL: `~/.grok/skills/unifi/api.env`. Secret (mode 600, never print, never `set -x`, never yadm): sibling `api.key` (raw key, one line). `source` of `api.env` loads both.
+Non-secret URL: `~/.grok/skills/unifi/api.env`. Secret (mode 600, never print, never `set -x`, never yadm plaintext): sibling `api.key` (raw key, one line). `source` of `api.env` loads both.
 
 ```
 # api.env
@@ -38,7 +40,7 @@ curl -sk -o /tmp/unifi-api.out -w '%{http_code}\n' \
 - Official Integration API: `${UNIFI_URL}/proxy/network/integration/v1/…`. Docs: https://developer.ui.com
 - Older Network endpoints when v1 cannot do the job: `${UNIFI_URL}/proxy/network/api/s/default/…` with the same header.
 - v1 site id: `88f7af54-98f8-306a-a1c7-c9349722b1f6` (name Default). Legacy site name: `default`.
-- Key is present and was verified (GET `/sites` → 200). HTTP 401 → key revoked or file overwritten.
+- HTTP 401 → key revoked or file overwritten.
 
 ## Connect (SSH, host only)
 
@@ -48,16 +50,7 @@ ssh -o BatchMode=yes unifi '…'
 
 Fallback: `ssh -o BatchMode=yes pve 'pct exec 105 -- …'`
 
-| | |
-|---|---|
-| SSH alias | `unifi` → `root@192.168.1.184` |
-| FQDN | `unifi-os-server.lan.podval.org` |
-| Guest | PVE LXC **105** (`unifi-os-server`), Debian 13 |
-| Auth | Same YubiKey FIDO2 (`~/.ssh/id_ed25519_sk.pub`) |
-| UI | https://192.168.1.184:11443 (HTTP 200). **Not** :8443 |
-| Switch | **192.168.1.245** is the USW-Pro-24-PoE, not the controller |
-
-The YubiKey cannot be touched from Grok. If `BatchMode` fails, tell the user to run `ssh unifi` (or `ssh pve`) once in a normal terminal, tap, then retry.
+YubiKey: `yk-tap` for `unifi` or `pve` (user rule). UI is `:11443`, not `:8443`. **192.168.1.245** is the switch, not the controller.
 
 Inside the UniFi OS **podman** container (Network app + mongo):
 
@@ -70,22 +63,6 @@ sudo -u uosserver -H env XDG_RUNTIME_DIR=/run/user/1000 podman exec uosserver �
 
 Do not print Wi‑Fi passphrases, mongo dumps of `x_passphrase`, UI cookies, or local API keys (`set -x` will leak them).
 
-## Safety
-
-- **Never** `uosserver-purge`, `uosserver stop`, factory-reset, forget-device, or force-provision the USG unless the user asked. Stopping the controller does not immediately drop Wi‑Fi, but it blocks changes and inform.
-- **Never** write the ace mongo DB or `/usr/lib/unifi/data/system.properties` as a way to “edit config”.
-- Do not dump `wlanconf` documents — they contain PSK material.
-- **Write** via the local API (or UI). Mongo is read-only inventory when the API cannot answer. Never create keys by inserting into `ace.api_key`.
-- Before host-level edits: `cp -a` the file to `/root/….bak.$(date +%Y%m%d%H%M%S)`.
-
-## Runtime (re-check with `uosserver status`)
-
-- Host units: `uosserver.service`, `uosserver-updater.service` (run as user `uosserver`).
-- Container image `uosserver`, UniFi OS Server **5.1.21**, Network **10.5.67**, status READY.
-- Container services: `unifi.service` (Java + mongod `:27117`), `unifi-core.service`, `ulp-go.service`.
-- Data on the LXC: `/var/lib/uosserver/`. App data in the container: `/usr/lib/unifi/data/`.
-- Inform/STUN etc. published via pasta: `8080`, `3478/udp`, `11443→443`, plus 8444/8880–8882/5671/6789/9543.
-
 Read-only inventory (names/IPs only):
 
 ```bash
@@ -96,25 +73,13 @@ sudo -u uosserver -H env XDG_RUNTIME_DIR=/run/user/1000 \
   '
 ```
 
-## Site (last inventoried)
+## Safety
 
-One useful site: `default` (“Default”). LAN `192.168.1.1/24`. Public WAN on the USG was `73.143.105.42` (same IP cloudflare-ddns tracks for `k39.podval.org`).
-
-| Type | Model | Name | Address |
-|---|---|---|---|
-| ugw | UGW3 | USG 3P | WAN 73.143.105.42 |
-| uap | U7PG2 | AC Pro | 192.168.1.72 |
-| uap | U7NHD | Nano HD | 192.168.1.161 |
-| usw | US8P60 | US 8 60W | 192.168.1.210 |
-| usw | USPM24P | USW Pro Max 24 PoE | 192.168.1.245 |
-
-WLANs (do not print keys): `podval-u` is people Wi‑Fi, currently **2.4 + 5 GHz** so the Samsung fridge can stay online (2.4-only, still on this SSID at `.113`). `podval-2g` is **2.4 GHz IoT** (boiler, dishwasher). One LAN, no extra VLANs. DHCP pool `192.168.1.100–199`.
-
-### Later (do not start unless asked)
-
-- **Move refrigerator to `podval-2g`.** SmartThings has no Wi‑Fi picker for this fridge. AP path (Door Alarm, hold Fridge until `AP`) **tried 2026-08-19 and failed**. Next try: **power the fridge off** (or unplug a minute), then AP again; phone on `podval-2g`; Reclaim if “already registered”. Do not delete the device in SmartThings first.
-- **ratgdo** `.240` is already on `podval-2g` (moved 2026-08-19 by OTA; same DHCP reservation). Firmware ESPHome **2024.8.3** — do not bump to current `esphome-ratgdo` (needs 2026.4+ and API encryption; would break HA). See HA skill.
-- Then set `podval-u` back to **5 GHz only** (disable 2.4 on that SSID). Confirm UniFi shows `refrigerator` on `podval-2g` first.
+- **Never** `uosserver-purge`, `uosserver stop`, factory-reset, forget-device, or force-provision the USG unless the user asked. Stopping the controller does not immediately drop Wi‑Fi, but it blocks changes and inform.
+- **Never** write the ace mongo DB or `/usr/lib/unifi/data/system.properties` as a way to “edit config”.
+- Do not dump `wlanconf` documents — they contain PSK material.
+- **Write** via the local API (or UI). Mongo is read-only inventory when the API cannot answer. Never create keys by inserting into `ace.api_key`.
+- Before host-level edits: `cp -a` the file to `/root/….bak.$(date +%Y%m%d%H%M%S)`.
 
 ## First move in a new session
 
