@@ -4,7 +4,7 @@ description: >
   Operate Leonid Dubinsky's Proxmox VE host from Grok Build over SSH.
   Use when the user mentions Proxmox, PVE, VMs, LXC, haos, the docker VM,
   Frigate, cloudflare-ddns, cloudflared, UniFi OS, virtiofs, /mnt/data,
-  /mnt/store, or asks to start/stop guests or inspect host storage.
+  or asks to start/stop guests or inspect host storage.
   Also when they run /proxmox.
 metadata:
   short-description: "SSH into PVE and manage guests safely"
@@ -16,7 +16,7 @@ Grok Build is a **config engineer on the hypervisor**, not a guest OS. Use `ssh 
 
 Do not install Grok on the PVE host.
 
-House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/SystemAdministration/ProxMox.md`. Read it before changing guests or storage. Frigate iGPU plan: `Frigate.md` § iGPU passthrough. **Do not start** later items (prune `/mnt/store`, vzdump, iGPU) unless the user asks.
+House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/SystemAdministration/ProxMox.md`. Read it before changing guests or storage. Frigate iGPU plan: `Frigate.md` § iGPU passthrough. **Do not start** later items (vzdump, iGPU) unless the user asks. `pve/store` / `/mnt/store` is **gone** (media on `/mnt/data`); do not recreate the LV.
 
 ## Connect
 
@@ -38,7 +38,7 @@ Do not print cloudflared tunnel tokens, UniFi credentials, or Cloudflare API key
 - Prefer `pvesh` / `qm` / `pct` over hand-editing `/etc/pve` when a command exists.
 - **Never** attach virtiofs to VM 101 — it hangs UEFI boot. Frigate stays on NFS.
 - Do **not** restore `go run …@latest` on LXC 103 (`cloudflare-ddns`) — that filled the disk.
-- Filling `/mnt/store` can make the thin pool read-only and stall guests.
+- Do not recreate `pve/store` / `/mnt/store`. Filling a thin LV on `pve/data` can make the pool read-only and stall guests.
 
 ## First move in a new session
 
