@@ -29,6 +29,13 @@ if [ -S "$ctrl" ] && ssh -O check -o ControlPath="$ctrl" "$ssh_host" 2>/dev/null
 fi
 rm -f "$ctrl"
 
+if ! ssh-add -L 2>/dev/null | grep -q 'sk-ssh-ed25519@openssh.com'; then
+  echo "yk-tap: no FIDO identity in the agent (ssh-add -L)." >&2
+  echo "yk-tap: open a visible terminal with ssh-add -K so the PIN can be entered, then re-run." >&2
+  echo "yk-tap: do not open the tap window until the key is loaded — IdentityFile is the .pub." >&2
+  exit 3
+fi
+
 if [ -z "$ready" ]; then
   ready="/tmp/yk-tap-${target}.ready"
 fi
