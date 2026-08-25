@@ -13,9 +13,9 @@ permission_mode = "always-approve"
 official_marketplace_auto_installed = true
 default_skills_installs_purged = true
 
-  [[marketplace.sources]]
-  name = "xAI Official"
-  git = "https://github.com/xai-org/plugin-marketplace.git"
+[[marketplace.sources]]
+name = "xAI Official"
+git = "https://github.com/xai-org/plugin-marketplace.git"
 
 [tools]
 respect_gitignore = true
@@ -24,7 +24,8 @@ respect_gitignore = true
 name = "grok-build"
 
 [models]
-default = "grok-build"
+default = "grok-4.6"
+default_reasoning_effort = "high"
 
 [privacy]
 privacy_banner_acked = "2026-08-17T16:17:02Z"
@@ -32,10 +33,18 @@ privacy_banner_acked = "2026-08-17T16:17:02Z"
 [mcp_servers.playwright]
 command = "npx"
 args = [
-  "-y",
-  "@playwright/mcp@latest",
-  "--executable-path",
-  "/usr/bin/chromium"
+    "-y",
+    "@playwright/mcp@latest",
+    "--executable-path",
+    "/usr/bin/chromium",
 ]
 enabled = true
 startup_timeout_sec = 120
+
+[mcp_servers.intellij]
+command = "/home/dub/.local/share/JetBrains/Toolbox/apps/intellij-idea/bin/idea"
+args = ["stdioMcpServer"]
+enabled = true
+
+[mcp_servers.intellij.env]
+IJ_MCP_SERVER_PORT = "64342"
