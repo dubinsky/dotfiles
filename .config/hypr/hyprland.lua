@@ -34,3 +34,8 @@ o.window(
   { class = "^(jetbrains-.*)$", float = false },
   { group = "set" }
 )
+
+-- omarchy-screensaver exits unless it is the active window. The launcher
+-- restores the previous monitor afterwards, which refocuses the previous
+-- window and kills the screensaver in ~2s. Keep it focused while visible.
+o.window("org.omarchy.screensaver", { stay_focused = true })
