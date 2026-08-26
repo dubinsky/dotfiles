@@ -64,6 +64,16 @@
     "lock": 900,
     "screensaver": 600
   },
-  "plugins": [],
-  "version": 1
+  "plugins": [
+    {
+      "id": "dub.idle"
+    }
+  ],
+  "version": 1,
+  "disabledPlugins": [
+    "omarchy.idle"
+  ],
+  "cloneSourceRestores": [
+    "dub.idle"
+  ]
 }

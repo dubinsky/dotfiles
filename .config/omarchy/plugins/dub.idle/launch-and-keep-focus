@@ -1,0 +1,19 @@
+#!/bin/bash
+# Launch the packaged Omarchy screensaver, then put focus back on it.
+#
+# omarchy-launch-screensaver restores the previously focused monitor at the
+# end. omarchy-screensaver exits unless it is the active window, so that
+# restore kills the screensaver in about a second. stay_focused on the
+# window helps; this is the belt.
+
+set -euo pipefail
+
+if [[ $(omarchy-shell lock isLocked 2>/dev/null) == "true" ]]; then
+  exit 0
+fi
+
+omarchy-launch-screensaver "$@"
+
+hyprctl dispatch "hl.dsp.focus({ window = \"class:org.omarchy.screensaver\" })" >/dev/null 2>&1 \
+  || hyprctl dispatch focuswindow "class:org.omarchy.screensaver" >/dev/null 2>&1 \
+  || true
