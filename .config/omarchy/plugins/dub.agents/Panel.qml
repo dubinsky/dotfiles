@@ -306,7 +306,7 @@ Panel {
     cursorActive = false
     nowMs = Date.now()
     if (panelFlick) panelFlick.contentY = 0
-    usage.refreshLimits()
+    usage.refreshAll(true)
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
 

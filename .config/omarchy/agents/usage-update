@@ -8,6 +8,12 @@ GROK_COLLECTOR="${GROK_COLLECTOR:-$HOME/.config/omarchy/agents/omarchy-agent-usa
 
 args=("$@")
 status=0
+{
+  printf '%s' "$(date -Iseconds) pid=$$ cwd=$PWD argv:"
+  printf ' %q' "$0" "${args[@]}"
+  printf '\n'
+} >>"${XDG_CACHE_HOME:-$HOME/.cache}/omarchy/agent-usage/update.log" 2>/dev/null || true
+
 # This machine is Grok-only; skip the packaged Claude/Codex/Fireworks collectors.
 "$OMARCHY_PATH/bin/omarchy-agent-usage-update" \
   --except claude --except codex --except fireworks \
