@@ -1,0 +1,688 @@
+#!/usr/bin/python3
+# omarchy:summary=Print the Grok usage record as JSON
+# omarchy:args=[--force] [--limits-only] [--write]
+# omarchy:hidden=true
+"""Collect Grok Build usage into one display-ready JSON record.
+
+Local token stats come from ~/.grok/sessions/*/updates.jsonl usage events.
+Credit windows, prepaid balance, and the plan name come from the Grok CLI
+billing and settings endpoints using the login in ~/.grok/auth.json. The
+agents panel only ever reads the JSON this prints (or --write drops next to
+the other collectors).
+"""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import sys
+import tempfile
+import time
+import urllib.error
+import urllib.request
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+
+AGENT_ID = "grok"
+AGENT_NAME = "Grok"
+AUTH_HELP = "Run `grok login` to restore credit usage."
+CREDITS_URL = "https://cli-chat-proxy.grok.com/v1/billing?format=credits"
+SETTINGS_URL = "https://cli-chat-proxy.grok.com/v1/settings"
+PROBE_MIN_INTERVAL_SECONDS = 15
+SCAN_REUSE_SECONDS = 20
+LIMITS_ONLY_REUSE_SECONDS = 900
+
+
+class GrokError(Exception):
+  pass
+
+
+def grok_home() -> Path:
+  return Path(os.environ.get("GROK_HOME") or (Path.home() / ".grok")).expanduser()
+
+
+def cache_root() -> Path:
+  root = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "omarchy" / "agent-usage"
+  root.mkdir(parents=True, exist_ok=True)
+  return root
+
+
+def usage_dir() -> Path:
+  state = Path(os.environ.get("XDG_STATE_HOME") or (Path.home() / ".local" / "state"))
+  path = state / "omarchy" / "agents" / "usage"
+  path.mkdir(parents=True, exist_ok=True)
+  return path
+
+
+def number(value: Any) -> int:
+  try:
+    return max(0, round(float(value or 0)))
+  except (TypeError, ValueError):
+    return 0
+
+
+def empty_bucket() -> dict[str, int]:
+  return {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "cacheReadInputTokens": 0,
+    "cacheCreationInputTokens": 0,
+  }
+
+
+def empty_stats() -> dict[str, Any]:
+  return {
+    "todayPrompts": 0,
+    "todaySessions": 0,
+    "todayTotalTokens": 0,
+    "todayTokensByModel": {},
+    "recentDays": [],
+    "totalPrompts": 0,
+    "totalSessions": 0,
+    "activeDays": 0,
+    "activeDates": [],
+    "modelUsage": {},
+  }
+
+
+def local_now() -> datetime:
+  return datetime.now().astimezone()
+
+
+def local_date_string(value: datetime | None = None) -> str:
+  return (value or local_now()).date().isoformat()
+
+
+def recent_date_strings() -> list[str]:
+  today = local_now().date()
+  return [(today - timedelta(days=offset)).isoformat() for offset in range(6, -1, -1)]
+
+
+def parse_iso(raw: str) -> datetime | None:
+  text = str(raw or "").strip()
+  if not text:
+    return None
+  text = text.replace("Z", "+00:00")
+  if "." in text:
+    head, rest = text.split(".", 1)
+    digits = ""
+    tz = ""
+    for char in rest:
+      if char.isdigit():
+        digits += char
+      else:
+        tz = rest[len(digits):]
+        break
+    text = f"{head}.{(digits + '000000')[:6]}{tz}"
+  try:
+    parsed = datetime.fromisoformat(text)
+  except ValueError:
+    return None
+  if parsed.tzinfo is None:
+    parsed = parsed.replace(tzinfo=timezone.utc)
+  return parsed
+
+
+def local_day_from_timestamp(value: Any) -> str:
+  if value is None:
+    return local_date_string()
+  if isinstance(value, (int, float)):
+    seconds = float(value) / 1000.0 if float(value) > 10_000_000_000 else float(value)
+    try:
+      return datetime.fromtimestamp(seconds).date().isoformat()
+    except (OverflowError, OSError, ValueError):
+      return local_date_string()
+  parsed = parse_iso(str(value))
+  if parsed is None:
+    return local_date_string()
+  return parsed.astimezone().date().isoformat()
+
+
+def money_cents(value: Any) -> float | None:
+  if isinstance(value, dict):
+    value = value.get("val")
+  try:
+    cents = float(value)
+  except (TypeError, ValueError):
+    return None
+  if not (cents >= 0):
+    return None
+  return cents / 100.0
+
+
+def percent_fraction(value: Any) -> float:
+  try:
+    n = float(value)
+  except (TypeError, ValueError):
+    return -1.0
+  if n < 0:
+    return -1.0
+  return min(1.0, n / 100.0)
+
+
+def read_json(path: Path) -> Any | None:
+  try:
+    return json.loads(path.read_text(encoding="utf-8"))
+  except (OSError, json.JSONDecodeError):
+    return None
+
+
+def write_json(path: Path, payload: Any, mode: int = 0o644) -> None:
+  path.parent.mkdir(parents=True, exist_ok=True)
+  handle_fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+  tmp = Path(tmp_name)
+  try:
+    with os.fdopen(handle_fd, "w", encoding="utf-8") as handle:
+      handle.write(json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n")
+    tmp.chmod(mode)
+    tmp.replace(path)
+  except BaseException:
+    tmp.unlink(missing_ok=True)
+    raise
+
+
+# ---------------------------------------------------------------- auth
+
+
+def auth_entries(auth_path: Path) -> list[dict[str, Any]]:
+  parsed = read_json(auth_path)
+  if not isinstance(parsed, dict):
+    return []
+  entries: list[dict[str, Any]] = []
+  for key, entry in parsed.items():
+    if not isinstance(entry, dict):
+      continue
+    token = str(entry.get("key") or "").strip()
+    if not token:
+      continue
+    item = dict(entry)
+    item["_scope"] = str(key)
+    item["key"] = token
+    entries.append(item)
+  return entries
+
+
+def token_expired(entry: dict[str, Any], now: datetime) -> bool:
+  parsed = parse_iso(str(entry.get("expires_at") or ""))
+  if parsed is None:
+    return False
+  return parsed <= now
+
+
+def pick_auth(entries: list[dict[str, Any]], now: datetime) -> dict[str, Any] | None:
+  if not entries:
+    return None
+
+  def score(entry: dict[str, Any]) -> tuple[int, int, str]:
+    live = 0 if token_expired(entry, now) else 1
+    preferred = 1 if str(entry.get("_scope") or "").startswith("https://auth.x.ai") else 0
+    created = str(entry.get("create_time") or "")
+    return (live, preferred, created)
+
+  return max(entries, key=score)
+
+
+# ----------------------------------------------------------- local sessions
+
+
+def extract_usage(obj: dict[str, Any]) -> dict[str, Any] | None:
+  params = obj.get("params")
+  if not isinstance(params, dict):
+    return None
+  update = params.get("update")
+  if isinstance(update, dict) and isinstance(update.get("usage"), dict):
+    return update["usage"]
+  if isinstance(params.get("usage"), dict):
+    return params["usage"]
+  return None
+
+
+def add_bucket(target: dict[str, dict[str, int]], model: str, usage: dict[str, Any]) -> int:
+  input_tokens = number(usage.get("inputTokens") or usage.get("input_tokens"))
+  output_tokens = number(usage.get("outputTokens") or usage.get("output_tokens"))
+  cache_read = number(
+    usage.get("cachedReadTokens")
+    or usage.get("cacheReadInputTokens")
+    or usage.get("cache_read_input_tokens")
+  )
+  cache_write = number(
+    usage.get("cacheCreationTokens")
+    or usage.get("cacheCreationInputTokens")
+    or usage.get("cache_creation_input_tokens")
+  )
+  total = number(usage.get("totalTokens") or usage.get("total_tokens"))
+  uncached = max(0, input_tokens - cache_read)
+  if total <= 0:
+    total = uncached + output_tokens + cache_read + cache_write
+  bucket = target.setdefault(model, empty_bucket())
+  bucket["inputTokens"] += uncached
+  bucket["outputTokens"] += output_tokens
+  bucket["cacheReadInputTokens"] += cache_read
+  bucket["cacheCreationInputTokens"] += cache_write
+  return total
+
+
+def scan_updates_file(path: Path) -> dict[str, Any]:
+  days: dict[str, dict[str, Any]] = {}
+  models: dict[str, dict[str, int]] = {}
+  prompts = 0
+  with path.open("r", encoding="utf-8", errors="replace") as handle:
+    for line in handle:
+      if '"usage"' not in line:
+        continue
+      try:
+        obj = json.loads(line)
+      except json.JSONDecodeError:
+        continue
+      if not isinstance(obj, dict):
+        continue
+      usage = extract_usage(obj)
+      if not usage:
+        continue
+      model_usage = usage.get("modelUsage") if isinstance(usage.get("modelUsage"), dict) else {}
+      day = local_day_from_timestamp(obj.get("timestamp"))
+      day_row = days.setdefault(day, {"tokens": 0, "prompts": 0, "byModel": {}})
+      if model_usage:
+        for model, bucket in model_usage.items():
+          if not isinstance(bucket, dict):
+            continue
+          name = str(model or "grok")
+          total = add_bucket(models, name, bucket)
+          if total <= 0:
+            continue
+          day_row["tokens"] += total
+          day_row["byModel"][name] = day_row["byModel"].get(name, 0) + total
+        day_row["prompts"] += 1
+        prompts += 1
+        continue
+      name = str(usage.get("model") or "grok")
+      total = add_bucket(models, name, usage)
+      if total <= 0:
+        continue
+      day_row["tokens"] += total
+      day_row["byModel"][name] = day_row["byModel"].get(name, 0) + total
+      day_row["prompts"] += 1
+      prompts += 1
+  return {"days": days, "models": models, "prompts": prompts}
+
+
+def session_kind(session_dir: Path) -> str:
+  summary = read_json(session_dir / "summary.json")
+  if isinstance(summary, dict):
+    return str(summary.get("session_kind") or "")
+  return ""
+
+
+def iter_session_dirs(sessions_root: Path) -> list[Path]:
+  if not sessions_root.is_dir():
+    return []
+  found: list[Path] = []
+  for cwd_dir in sessions_root.iterdir():
+    if not cwd_dir.is_dir() or cwd_dir.name.startswith("."):
+      continue
+    for session_dir in cwd_dir.iterdir():
+      if not session_dir.is_dir() or session_dir.name.startswith("."):
+        continue
+      if (session_dir / "updates.jsonl").is_file() or (session_dir / "summary.json").is_file():
+        found.append(session_dir)
+  return found
+
+
+def merge_file_stats(files: dict[str, dict[str, Any]]) -> dict[str, Any]:
+  today = local_date_string()
+  recent_dates = recent_date_strings()
+  recent = {day: 0 for day in recent_dates}
+  today_by_model: dict[str, int] = {}
+  model_usage: dict[str, dict[str, int]] = {}
+  active_dates: set[str] = set()
+  today_sessions: set[str] = set()
+  sessions: set[str] = set()
+  today_prompts = 0
+  total_prompts = 0
+
+  for path, info in files.items():
+    if not isinstance(info, dict):
+      continue
+    session_id = str(info.get("session") or path)
+    days = info.get("days") if isinstance(info.get("days"), dict) else {}
+    models = info.get("models") if isinstance(info.get("models"), dict) else {}
+    prompts = number(info.get("prompts"))
+    if prompts <= 0 and not days:
+      continue
+    sessions.add(session_id)
+    total_prompts += prompts
+    for model, bucket in models.items():
+      if not isinstance(bucket, dict):
+        continue
+      dest = model_usage.setdefault(str(model), empty_bucket())
+      for key in dest:
+        dest[key] += number(bucket.get(key))
+    for day, row in days.items():
+      if not isinstance(row, dict):
+        continue
+      tokens = number(row.get("tokens"))
+      if tokens <= 0 and number(row.get("prompts")) <= 0:
+        continue
+      active_dates.add(str(day))
+      if day in recent:
+        recent[day] += tokens
+      if day == today:
+        today_sessions.add(session_id)
+        today_prompts += number(row.get("prompts"))
+        by_model = row.get("byModel") if isinstance(row.get("byModel"), dict) else {}
+        for model, count in by_model.items():
+          today_by_model[str(model)] = today_by_model.get(str(model), 0) + number(count)
+
+  return {
+    "todayPrompts": today_prompts,
+    "todaySessions": len(today_sessions),
+    "todayTotalTokens": sum(today_by_model.values()),
+    "todayTokensByModel": today_by_model,
+    "recentDays": [{"date": day, "messageCount": recent[day]} for day in recent_dates],
+    "modelUsage": model_usage,
+    "totalPrompts": total_prompts,
+    "totalSessions": len(sessions),
+    "activeDays": len(active_dates),
+    "activeDates": sorted(active_dates),
+  }
+
+
+def scan_sessions(sessions_root: Path, force: bool) -> dict[str, Any]:
+  cache_file = cache_root() / "grok-scan.json"
+  lock_file = cache_root() / "grok-scan.lock"
+  with lock_file.open("w") as lock:
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    cached = read_json(cache_file) if cache_file.exists() else {}
+    files = cached.get("files") if isinstance(cached, dict) and isinstance(cached.get("files"), dict) else {}
+    live: dict[str, dict[str, Any]] = {}
+    for session_dir in iter_session_dirs(sessions_root):
+      if session_kind(session_dir) == "subagent":
+        continue
+      updates = session_dir / "updates.jsonl"
+      if not updates.is_file():
+        continue
+      key = str(updates)
+      try:
+        stat = updates.stat()
+      except OSError:
+        continue
+      previous = files.get(key) if isinstance(files.get(key), dict) else {}
+      if (
+        not force
+        and previous
+        and number(previous.get("mtime_ns")) == getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1e9))
+        and number(previous.get("size")) == stat.st_size
+      ):
+        live[key] = previous
+        continue
+      parsed = scan_updates_file(updates)
+      live[key] = {
+        "session": session_dir.name,
+        "mtime_ns": getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1e9)),
+        "size": stat.st_size,
+        **parsed,
+      }
+    write_json(cache_file, {"files": live, "scannedAt": datetime.now(timezone.utc).isoformat()})
+    return merge_file_stats(live)
+
+
+# -------------------------------------------------------------- billing
+
+
+def request_json(url: str, token: str, timeout: int = 10) -> dict[str, Any]:
+  request = urllib.request.Request(
+    url,
+    headers={
+      "Authorization": "Bearer " + token,
+      "Accept": "application/json",
+      "x-xai-token-auth": "xai-grok-cli",
+    },
+  )
+  try:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+      payload = json.loads(response.read().decode("utf-8", errors="replace"))
+      return payload if isinstance(payload, dict) else {}
+  except urllib.error.HTTPError as error:
+    if error.code in (401, 403):
+      raise GrokError("Grok rejected the saved sign-in. Run `grok login`.") from error
+    raise GrokError(f"Grok billing returned HTTP {error.code}") from error
+  except (urllib.error.URLError, TimeoutError) as error:
+    raise GrokError("transport") from error
+  except json.JSONDecodeError as error:
+    raise GrokError("Grok billing returned an invalid response") from error
+
+
+def period_title(period_type: str, fallback: str = "Credits") -> str:
+  text = str(period_type or "").upper()
+  if "WEEK" in text:
+    return "Weekly"
+  if "MONTH" in text:
+    return "Monthly"
+  if "DAY" in text:
+    return "Daily"
+  return fallback
+
+
+def product_title(product: str) -> str:
+  raw = str(product or "").strip()
+  if raw.lower() in ("grokbuild", "grok-build"):
+    return "Grok Build"
+  if raw.lower() in ("grokchat", "grok-chat"):
+    return "Grok Chat"
+  if not raw:
+    return "Credits"
+  return raw
+
+
+def limits_from_credits(payload: dict[str, Any]) -> list[dict[str, Any]]:
+  config = payload.get("config") if isinstance(payload.get("config"), dict) else payload
+  period = config.get("currentPeriod") if isinstance(config.get("currentPeriod"), dict) else {}
+  resets_at = str(period.get("end") or config.get("billingPeriodEnd") or "")
+  title = period_title(str(period.get("type") or ""))
+  percent = percent_fraction(config.get("creditUsagePercent"))
+  limits: list[dict[str, Any]] = []
+  if percent >= 0:
+    limits.append({"label": title, "title": title, "percent": percent, "resetsAt": resets_at})
+  products = config.get("productUsage")
+  if isinstance(products, list):
+    for item in products:
+      if not isinstance(item, dict):
+        continue
+      name = product_title(str(item.get("product") or ""))
+      product_percent = percent_fraction(item.get("usagePercent"))
+      if product_percent < 0 or name == title:
+        continue
+      # The overall weekly meter already covers a lone Grok Build window.
+      if name == "Grok Build" and abs(product_percent - percent) < 0.02:
+        continue
+      limits.append({"label": name, "title": name, "percent": product_percent, "resetsAt": resets_at})
+  cap = money_cents(config.get("onDemandCap"))
+  used = money_cents(config.get("onDemandUsed"))
+  if cap and cap > 0 and used is not None:
+    limits.append({
+      "label": "On-demand",
+      "title": "On-demand",
+      "percent": min(1.0, used / cap),
+      "resetsAt": resets_at,
+    })
+  return limits
+
+
+def balance_from_credits(payload: dict[str, Any]) -> dict[str, Any] | None:
+  config = payload.get("config") if isinstance(payload.get("config"), dict) else payload
+  remaining = money_cents(config.get("prepaidBalance"))
+  if remaining is None:
+    return None
+  return {
+    "remaining": remaining,
+    "funded": 0,
+    "spent": 0,
+    "currency": "USD",
+    "estimated": False,
+  }
+
+
+def collect_billing(token: str, force: bool) -> dict[str, Any]:
+  result: dict[str, Any] = {
+    "limits": [],
+    "balance": None,
+    "tierLabel": "",
+    "usageStatusText": "",
+    "authHelpText": "",
+  }
+  probe_cache = cache_root() / "grok-limits.json"
+  cached = read_json(probe_cache) if probe_cache.exists() else {}
+  cached = cached if isinstance(cached, dict) else {}
+  fetched_at = number(cached.get("fetchedAtMs")) / 1000.0
+  if cached.get("limits") and not force and time.time() - fetched_at < PROBE_MIN_INTERVAL_SECONDS:
+    result["limits"] = cached.get("limits") or []
+    result["balance"] = cached.get("balance")
+    result["tierLabel"] = str(cached.get("tierLabel") or "")
+    return result
+
+  try:
+    credits = request_json(CREDITS_URL, token)
+  except GrokError as error:
+    if str(error) == "transport":
+      result["retryAdvised"] = True
+      result["limits"] = cached.get("limits") or []
+      result["balance"] = cached.get("balance")
+      result["tierLabel"] = str(cached.get("tierLabel") or "")
+      if not result["limits"] and not result["balance"]:
+        result["usageStatusText"] = "Grok limits unavailable"
+        result["authHelpText"] = "Couldn't reach Grok billing. Retrying shortly. Local Grok stats are still shown."
+      return result
+    result["limits"] = cached.get("limits") or []
+    result["balance"] = cached.get("balance")
+    result["tierLabel"] = str(cached.get("tierLabel") or "")
+    result["usageStatusText"] = "Grok limits unavailable"
+    result["authHelpText"] = str(error)
+    return result
+
+  result["limits"] = limits_from_credits(credits)
+  result["balance"] = balance_from_credits(credits)
+  try:
+    settings = request_json(SETTINGS_URL, token, timeout=2)
+    result["tierLabel"] = str(settings.get("subscription_tier_display") or "").strip()
+  except GrokError:
+    result["tierLabel"] = str(cached.get("tierLabel") or "")
+
+  write_json(
+    probe_cache,
+    {
+      "fetchedAtMs": round(time.time() * 1000),
+      "limits": result["limits"],
+      "balance": result["balance"],
+      "tierLabel": result["tierLabel"],
+    },
+  )
+  return result
+
+
+# ---------------------------------------------------------------- record
+
+
+def base_record(**overrides: Any) -> dict[str, Any]:
+  record: dict[str, Any] = {
+    "schemaVersion": 1,
+    "id": AGENT_ID,
+    "name": AGENT_NAME,
+    "updatedAt": datetime.now(timezone.utc).isoformat(),
+    "ready": False,
+    "hasLocalStats": True,
+    "hasPromptStats": True,
+    "tierLabel": "",
+    "usageStatusText": "",
+    "authHelpText": "",
+    "limits": [],
+  }
+  record.update(empty_stats())
+  record.update(overrides)
+  return record
+
+
+def scan(force: bool, limits_only: bool) -> dict[str, Any]:
+  home = grok_home()
+  now = datetime.now(timezone.utc)
+  entries = auth_entries(home / "auth.json")
+  auth = pick_auth(entries, now)
+  sessions_root = home / "sessions"
+
+  cache_file = cache_root() / "grok-scan.json"
+  cached = read_json(cache_file) if cache_file.exists() else {}
+  cached_files = cached.get("files") if isinstance(cached, dict) and isinstance(cached.get("files"), dict) else {}
+  reuse_seconds = 0 if force else (LIMITS_ONLY_REUSE_SECONDS if limits_only else SCAN_REUSE_SECONDS)
+  scanned_at = parse_iso(str(cached.get("scannedAt") or "")) if isinstance(cached, dict) else None
+  if reuse_seconds > 0 and scanned_at is not None and cached_files:
+    age = (now - scanned_at.astimezone(timezone.utc)).total_seconds()
+    stats = merge_file_stats(cached_files) if age <= reuse_seconds else scan_sessions(sessions_root, force=False)
+  else:
+    stats = scan_sessions(sessions_root, force=False)
+
+  record = base_record()
+  record.update(stats)
+
+  if auth is None:
+    record["usageStatusText"] = "Waiting for auth" if number(stats.get("totalPrompts")) <= 0 else ""
+    record["authHelpText"] = AUTH_HELP
+    record["ready"] = number(stats.get("totalPrompts")) > 0
+    return record
+
+  if token_expired(auth, now):
+    record["usageStatusText"] = "Sign-in expired"
+    record["authHelpText"] = (
+      "Grok's saved sign-in expired. Start Grok, or run `grok login`, to refresh it."
+    )
+
+  billing = collect_billing(str(auth.get("key") or ""), force=force)
+  record["limits"] = billing.get("limits") or []
+  if billing.get("balance") is not None:
+    record["balance"] = billing["balance"]
+  if billing.get("tierLabel"):
+    record["tierLabel"] = billing["tierLabel"]
+  if billing.get("usageStatusText") and not record["usageStatusText"]:
+    record["usageStatusText"] = billing["usageStatusText"]
+  if billing.get("authHelpText") and (
+    record["usageStatusText"] in ("Grok limits unavailable", "Waiting for auth", "Sign-in expired")
+    or not record["authHelpText"]
+  ):
+    record["authHelpText"] = billing["authHelpText"]
+  if billing.get("retryAdvised"):
+    record["retryAdvised"] = True
+  record["ready"] = (
+    number(stats.get("totalPrompts")) > 0
+    or len(record["limits"]) > 0
+    or bool(record.get("balance"))
+  )
+  return record
+
+
+def main() -> int:
+  parser = argparse.ArgumentParser(description="Print the Grok usage record as JSON")
+  parser.add_argument("--force", action="store_true")
+  parser.add_argument("--limits-only", action="store_true")
+  parser.add_argument("--write", action="store_true", help="write grok.json into the agents usage directory")
+  args = parser.parse_args()
+
+  try:
+    record = scan(force=args.force, limits_only=args.limits_only)
+  except Exception as error:
+    record = base_record(
+      usageStatusText="Grok unavailable",
+      authHelpText="Grok usage scan failed",
+    )
+    print(f"omarchy-agent-usage-grok: {type(error).__name__}: {error}", file=sys.stderr)
+
+  payload = json.dumps(record, separators=(",", ":"), sort_keys=True)
+  if args.write:
+    write_json(usage_dir() / "grok.json", record, mode=0o600)
+  else:
+    print(payload)
+  return 0
+
+
+if __name__ == "__main__":
+  raise SystemExit(main())

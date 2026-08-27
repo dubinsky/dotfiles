@@ -1,0 +1,9 @@
+#!/bin/bash
+# Omarchy's mise install recreates coding-agent wrappers on update.
+# Keep Grok; drop the rest so this machine stays Grok-only.
+
+set -euo pipefail
+
+for cmd in claude codex copilot crush opencode ori pi omp agy; do
+  rm -f "$HOME/.local/bin/$cmd"
+done

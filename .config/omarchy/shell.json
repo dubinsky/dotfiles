@@ -38,7 +38,21 @@
           "id": "omarchy.tray"
         },
         {
-          "id": "omarchy.agents"
+          "id": "dub.agents",
+          "providers": {
+            "grok": {
+              "enabled": true
+            },
+            "claude": {
+              "enabled": false
+            },
+            "codex": {
+              "enabled": false
+            },
+            "fireworks": {
+              "enabled": false
+            }
+          }
         },
         {
           "id": "omarchy.bluetooth"

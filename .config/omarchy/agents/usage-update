@@ -1,0 +1,50 @@
+#!/bin/bash
+# Run packaged agent-usage collectors, then the local Grok collector.
+
+set -uo pipefail
+
+OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+GROK_COLLECTOR="${GROK_COLLECTOR:-$HOME/.config/omarchy/agents/omarchy-agent-usage-grok}"
+
+args=("$@")
+status=0
+# This machine is Grok-only; skip the packaged Claude/Codex/Fireworks collectors.
+"$OMARCHY_PATH/bin/omarchy-agent-usage-update" \
+  --except claude --except codex --except fireworks \
+  "${args[@]}" || status=$?
+rm -f \
+  "${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/agents/usage/claude.json" \
+  "${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/agents/usage/codex.json" \
+  "${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/agents/usage/fireworks.json"
+
+want_grok=1
+only=()
+flags=()
+set -- "${args[@]}"
+while (( $# > 0 )); do
+  case "$1" in
+    --force | --limits-only) flags+=("$1") ;;
+    --except)
+      shift
+      if [[ ${1:-} == grok ]]; then
+        want_grok=0
+      fi
+      ;;
+    -*) ;;
+    *) only+=("$1") ;;
+  esac
+  shift || true
+done
+
+if (( ${#only[@]} > 0 )); then
+  want_grok=0
+  for agent in "${only[@]}"; do
+    [[ $agent == grok ]] && want_grok=1
+  done
+fi
+
+if (( want_grok )) && [[ -x $GROK_COLLECTOR ]]; then
+  "$GROK_COLLECTOR" --write "${flags[@]}" || status=$?
+fi
+
+exit "$status"
