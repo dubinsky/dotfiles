@@ -25,7 +25,7 @@ name = "grok-build"
 
 [models]
 default = "grok-4.6"
-default_reasoning_effort = "high"
+default_reasoning_effort = "xhigh"
 
 [privacy]
 privacy_banner_acked = "2026-08-17T16:17:02Z"
@@ -48,3 +48,7 @@ enabled = true
 
 [mcp_servers.intellij.env]
 IJ_MCP_SERVER_PORT = "64342"
+
+[mcp_servers.cloudflare-api-opentorah]
+url = "https://mcp.cloudflare.com/mcp"
+enabled = true

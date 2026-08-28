@@ -7,6 +7,9 @@
           "id": "omarchy.indicators"
         },
         {
+          "id": "omarchy.media"
+        },
+        {
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "omarchy.clock",
@@ -31,6 +34,9 @@
         },
         {
           "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.active-window"
         }
       ],
       "right": [
@@ -59,6 +65,9 @@
         },
         {
           "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.microphone"
         },
         {
           "id": "omarchy.audio"
