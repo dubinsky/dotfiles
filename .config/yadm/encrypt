@@ -1,8 +1,20 @@
 # Secrets that travel with the dotfiles (encrypted as .local/share/yadm/archive).
 # Paths are relative to $HOME. yadm encrypt also copies these into info/exclude.
+# Do not yadm add the matched plaintext files.
 Podval/Keys/**
 OpenTorah/Keys/**
 CognoMath/Keys/**
 .grok/skills/unifi/api.key
-.config/rclone/rclone.conf
 .grok/skills/home-assistant/api.token
+.grok/auth.json
+.grok/mcp_credentials.json
+.config/rclone/rclone.conf
+.config/gcloud/application_default_credentials.json
+.config/gcloud/credentials.db
+.config/gcloud/access_tokens.db
+.config/gcloud/legacy_credentials/**
+.config/syncthing/config.xml
+.config/syncthing/*.pem
+.config/cursor/auth.json
+.config/Grok Bot/sand-secrets.json
+.config/Grok Bot/box-secrets-push-state.v1.json

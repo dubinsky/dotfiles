@@ -1,4 +1,7 @@
-# do not check in secrets!
+# do not check in secrets! (plaintext travels via yadm encrypt)
 auth.json
 auth.json.lock
+mcp_credentials.json
+mcp_credentials.lock
 skills/unifi/api.key
+skills/home-assistant/api.token
