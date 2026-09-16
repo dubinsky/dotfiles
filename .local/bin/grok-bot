@@ -1,0 +1,12 @@
+#!/bin/bash
+# Launcher for the official Grok Bot Linux AppImage.
+set -u
+
+APPIMAGE="${GROKBOT_APPIMAGE:-$HOME/.local/share/grok-bot/appimage}"
+
+if [[ ! -x $APPIMAGE ]]; then
+  echo "Grok Bot AppImage missing or not executable: $APPIMAGE" >&2
+  exit 1
+fi
+
+exec "$APPIMAGE" "$@"
