@@ -2,3 +2,7 @@
 java = "25"
 node = "25.1.0"
 "npm:@xai-official/grok" = "latest"
+"npm:playwright" = "latest"
+
+[settings.upgrade]
+auto_prune = false
