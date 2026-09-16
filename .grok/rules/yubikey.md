@@ -4,7 +4,14 @@ Leonid authenticates SSH and Git with a YubiKey FIDO2 key (`~/.ssh/id_ed25519_sk
 
 ## Required procedure
 
-Skip the helper only when `ssh -O check <alias>` already succeeds (mux live). After a reboot of the remote, delete the stale socket (`~/.ssh/control/ssh-…`) and run it again.
+Skip the helper only when the mux is already live on **yk-tap's ControlPath** (`~/.ssh/control/ssh-<user>@<real-host>:22` from the table below). After a reboot of the remote, delete that stale socket and run it again.
+
+`ssh -O check <alias>` is correct for `ha` / `pve` / `docker` / `unifi` (those are `Host` aliases). It is **wrong** for `git`: there is no `Host git`, so OpenSSH treats `git` as hostname `git` / user `dub` and looks at `ssh-dub@git:22`. For GitHub:
+
+```bash
+ssh -O check git@github.com
+# socket: ~/.ssh/control/ssh-git@github.com:22
+```
 
 Before any command that talks to a YubiKey-gated host (mux not live):
 
@@ -30,8 +37,8 @@ Before any command that talks to a YubiKey-gated host (mux not live):
    Do **not** run `ssh-add -K` in this TUI (no PIN field). Poll `ssh-add -L` until the key appears.
 
 4. Then run `~/.grok/scripts/yk-tap <ha|pve|docker|unifi|git>`. That opens a **separate visible terminal** whose only job is “TAP THE YUBIKEY NOW” and establishing `ControlMaster`. The script is Grok-only and is not on PATH. It exits non-zero if the agent still has no `sk-ssh-ed25519` identity — load the key first (step 3), do not retry the tap window.
-5. Wait for the ready file (`/tmp/yk-tap-<alias>.ready`, or the path you passed).
-6. Then run the real `ssh` / `yadm push` so it reuses the mux.
+5. Wait for the ready file (`/tmp/yk-tap-<alias>.ready`, or the path you passed). That file means the mux is up on yk-tap's socket.
+6. Immediately run the real `ssh` / `yadm push` / `git push`. Git remotes are `git@github.com`, which reuses `ssh-git@github.com:22`. Do not re-probe with `ssh -O check git`.
 
 Do this for Git remotes (`yadm push`, `git push`) and house SSH. `Host *` in `~/.ssh/config` uses the same key everywhere. `ControlPersist` on muxes opened by the helper is 15 minutes.
 
