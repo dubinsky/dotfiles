@@ -10,13 +10,9 @@
           "id": "omarchy.media"
         },
         {
-          "id": "omacom.elsewhen",
-          "zones": "New York|America/New_York, London|Europe/London, Dubai|Asia/Dubai, Tokyo|Asia/Tokyo, Los Angeles|America/Los_Angeles"
-        },
-        {
-          "format": "dddd HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "omarchy.clock",
+          "format": "ddd d MMM HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
           "verticalFormat": "HH\n—\nmm"
         },
         {
