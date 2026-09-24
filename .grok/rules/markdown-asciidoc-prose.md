@@ -2,9 +2,12 @@
 
 When you write or edit Markdown or AsciiDoc (`.md`, `.markdown`, `.adoc`, `.asciidoc`), reformat the **whole file**.
 Do not leave the rest of the file in the old wrap.
-This applies to every such file you touch: README, notes, fixtures, `AGENTS.md`, skills, Grok rules, and memory notes.
+This applies to every such file you touch: README, notes, fixtures, `AGENTS.md`, skills, and Grok rules.
 Do not reformat a file you only read.
-Do not apply this to chat replies, commit messages, or other file types.
+Do not apply this to chat replies, commit messages, memory files, or other file types.
+
+Memory files are the notes under `~/.grok/memory-v2/` (`topics/`, `observations/`, and archives).
+When you edit one, change the fact and leave the rest of the file as it is.
 
 ## Layout
 
