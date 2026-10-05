@@ -44,7 +44,7 @@
           "id": "omarchy.tray"
         },
         {
-          "id": "dub.agents",
+          "id": "omarchy.agents",
           "providers": {
             "grok": {
               "enabled": true
