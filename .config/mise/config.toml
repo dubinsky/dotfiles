@@ -1,7 +1,7 @@
 [tools]
+grok = { version = "latest", bin = "grok", url = 'https://storage.googleapis.com/grok-build-public-artifacts/cli/grok-{{ version }}-{{ os() }}-{{ arch(x64="x86_64", arm64="aarch64") }}', version_list_url = "https://x.ai/cli/stable", platforms = { windows-arm64 = { bin = "grok.exe", url = "https://storage.googleapis.com/grok-build-public-artifacts/cli/grok-{{ version }}-windows-aarch64.exe" }, windows-x64 = { bin = "grok.exe", url = "https://storage.googleapis.com/grok-build-public-artifacts/cli/grok-{{ version }}-windows-x86_64.exe" } } }
 java = "25"
-node = "25.1.0"
-"npm:@xai-official/grok" = "latest"
+node = "latest"
 "npm:playwright" = "latest"
 
 [settings.upgrade]
