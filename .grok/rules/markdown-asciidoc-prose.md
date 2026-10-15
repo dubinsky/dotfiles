@@ -49,7 +49,9 @@ Markdown and AsciiDoc join adjacent lines in a paragraph.
 In a list item or block quote, hanging-indent wrapped lines so they remain part of that item or quote.
 
 Do not start a new sentence on the same line after `.`, `?`, or `!`.
-Do not treat `e.g.`, `i.e.`, `etc.`, `vs.`, `Dr.`, or version numbers like `0.2.0` as sentence ends.
+Do not treat `e.g.`, `i.e.`, `etc.`, `vs.`, `Dr.`, `Mr.`, `Mrs.`, `Ms.`, a single-letter initial, a dotted abbreviation
+such as `U.S.` or `a.m.`, or version numbers like `0.2.0` as sentence ends.
+A parenthetical label such as `(2)` or `(see above)` stays on the sentence that precedes it.
 
 ## Do not reflow
 
