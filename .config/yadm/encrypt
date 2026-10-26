@@ -9,6 +9,7 @@ CognoMath/Keys/**
 .grok/auth.json
 .grok/mcp_credentials.json
 .config/rclone/rclone.conf
+.config/org.podval.tools.photo.client.json
 .config/gcloud/application_default_credentials.json
 .config/gcloud/credentials.db
 .config/gcloud/access_tokens.db
