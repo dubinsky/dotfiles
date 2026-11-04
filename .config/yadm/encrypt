@@ -10,6 +10,9 @@ CognoMath/Keys/**
 .grok/mcp_credentials.json
 .config/rclone/rclone.conf
 .config/org.podval.tools.photo.client.json
+.config/org.podval.tools.photo.token.json
+.config/runpod/api.key
+.config/runpod/bakeoff_ed25519
 .config/gcloud/application_default_credentials.json
 .config/gcloud/credentials.db
 .config/gcloud/access_tokens.db
