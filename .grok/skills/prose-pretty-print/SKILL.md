@@ -3,7 +3,7 @@ name: prose-pretty-print
 description: >
   Reflow Markdown and AsciiDoc with bin/pretty-print instead of by hand or with a script.
   Use when editing a .md, .markdown, .adoc, or .asciidoc file.
-  Do not use for memory files, HTML, XML, or a file that was only read.
+  Do not use for design documents, reviews, memory files, HTML, XML, or a file that was only read.
 metadata:
   short-description: "Run bin/pretty-print; do not reflow prose by hand"
 ---
@@ -36,6 +36,10 @@ Do not finish that file by hand.
 
 ## Do not run it
 
+- A design document or a review.
+  Leonid does not read them, so leave their wrapping as written.
+  That covers `grok-design-doc-*.md`, `grok-design-summary-*.md`, `grok-design-review-*.md`, `grok-review-*.md`, and
+  `grok-review-summary-*.md`, including a per-PR review file.
 - Anything under `~/.grok/memory-v2/`.
 - HTML, XML, TEI, or DocBook.
   The site walk pretty-prints TEI and DocBook.

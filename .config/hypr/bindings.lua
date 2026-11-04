@@ -28,6 +28,9 @@
 -- o.bind("SUPER + H", nil, "voxtype record toggle")
 -- o.bind("SUPER + PERIOD", nil, "omarchy-shell shell toggle omarchy.emojis")
 
+-- WhatsApp was removed. This was Super+Shift+Alt+G.
+hl.unbind("SUPER + SHIFT + ALT + G")
+
 o.bind("SUPER + SHIFT + J", "IntelliJ Idea", { launch = "idea", focus = "^idea$" })
 o.bind("SUPER + SHIFT + K", "Keymapp", { launch = "keymapp", focus = "^Keymapp" })
 o.bind("SUPER + SHIFT + L", "Calibre", { launch = "calibre", focus = "^calibre —" })

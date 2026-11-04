@@ -1,4 +1,2 @@
-byYearDirectoryName = "originals"
-rootPath = "Pictures"
-uploadDirectoryName = "Upload"
+rootPath = "Pictures/originals"
 zoneId = "America/New_York"

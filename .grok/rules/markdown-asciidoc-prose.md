@@ -11,6 +11,10 @@ Do not reflow by hand.
 Do not write a Python or regex script.
 Do not leave the rest of the file in the old wrap.
 This applies to every such file you touch: README, notes, fixtures, `AGENTS.md`, skills, and Grok rules.
+Do not pretty-print a design document or a review.
+Leonid does not read them, so leave their wrapping as written.
+That covers the design skill files `grok-design-doc-*.md`, `grok-design-summary-*.md`, and `grok-design-review-*.md`,
+and the review skill files `grok-review-*.md` and `grok-review-summary-*.md`, including a per-PR review file.
 Do not reformat a file you only read.
 Do not apply this to chat replies, commit messages, memory files, or other file types.
 

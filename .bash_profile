@@ -17,3 +17,5 @@ export PATH="$PATH:$HOME/.local/share/agda"
 
 # Devcontainer CLI
 export PATH="$PATH:$HOME/.devcontainers/bin"
+
+. "$HOME/.local/share/../bin/env"

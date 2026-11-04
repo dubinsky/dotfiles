@@ -39,3 +39,10 @@ o.window(
 -- restores the previous monitor afterwards, which refocuses the previous
 -- window and kills the screensaver in ~2s. Keep it focused while visible.
 o.window("org.omarchy.screensaver", { stay_focused = true })
+
+-- The agents panel runs omarchy-agent-usage-update from PATH. This directory
+-- holds a wrapper that renames Grok's stale "SuperGrok Heavy" label to Ultra.
+-- Omarchy's env setup always puts its own bin first, so this has to come after.
+local grok_plan_bin = (os.getenv("HOME") or "") .. "/.config/omarchy/bin"
+local session_path = os.getenv("PATH") or "/usr/bin"
+hl.env("PATH", grok_plan_bin .. ":" .. session_path)
