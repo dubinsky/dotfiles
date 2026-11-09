@@ -12,6 +12,22 @@ curl -fsSL https://oryx.nyc3.cdn.digitaloceanspaces.com/keymapp/keymapp-latest.t
   tar xzf - -C $KEYMAPP || \
   { echo "Download or extraction failed"; exit 1; }
 
+# The tarball is only the binary and icon.png. Apps reads a .desktop file.
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/keymapp.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Keymapp
+Comment=View and flash a ZSA keyboard layout
+Exec=$HOME/.local/share/keymapp/bin/keymapp
+Icon=$HOME/.local/share/keymapp/bin/icon.png
+Terminal=false
+Categories=Utility;
+StartupNotify=true
+StartupWMClass=Keymapp
+EOF
+
 # install udev rules
 RULES="/etc/udev/rules.d/"
 if [ ! -f "$RULES/50-zsa.rules" ]; then

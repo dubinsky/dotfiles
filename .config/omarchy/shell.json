@@ -84,6 +84,11 @@
         {
           "id": "omarchy.system-update"
         }
+      ],
+      "tray": [
+        {
+          "id": "superwhisper.panel"
+        }
       ]
     },
     "position": "top",
