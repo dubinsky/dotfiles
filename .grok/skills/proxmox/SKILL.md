@@ -20,6 +20,8 @@ Do not install Grok on the PVE host.
 LXC 108 (`cloud-infrastructure`) is the Pulumi guest: `notes/SystemAdministration/Cloud Infrastructure.md`.
 Do not vzdump it or snapshot it.
 SSH is tailnet-only.
+The cloud Grok Bot enters it with `pct exec 108` as `dub`.
+Do not open TCP 22 on the LAN for that path.
 Copy only the six Pulumi credential files onto it.
 
 House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/SystemAdministration/ProxMox.md`.
