@@ -17,7 +17,7 @@ Use `ssh pve` for VMs, LXC, storage, and USB passthrough.
 For Home Assistant YAML, use the `home-assistant` skill (`ssh ha`) — that is the HAOS guest, not this host.
 
 Do not install Grok on the PVE host.
-LXC 108 (`infra`) is the Pulumi guest: `notes/SystemAdministration/Infra.md`.
+LXC 108 (`cloud-infrastructure`) is the Pulumi guest: `notes/SystemAdministration/Cloud Infrastructure.md`.
 Do not vzdump it or snapshot it.
 SSH is tailnet-only.
 Copy only the six Pulumi credential files onto it.
