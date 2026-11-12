@@ -12,11 +12,21 @@ metadata:
 
 # Proxmox (this house)
 
-Grok Build is a **config engineer on the hypervisor**, not a guest OS. Use `ssh pve` for VMs, LXC, storage, and USB passthrough. For Home Assistant YAML, use the `home-assistant` skill (`ssh ha`) — that is the HAOS guest, not this host.
+Grok Build is a **config engineer on the hypervisor**, not a guest OS.
+Use `ssh pve` for VMs, LXC, storage, and USB passthrough.
+For Home Assistant YAML, use the `home-assistant` skill (`ssh ha`) — that is the HAOS guest, not this host.
 
 Do not install Grok on the PVE host.
+LXC 108 (`infra`) is the Pulumi guest: `notes/SystemAdministration/Infra.md`.
+Do not vzdump it or snapshot it.
+SSH is tailnet-only.
+Copy only the six Pulumi credential files onto it.
 
-House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/SystemAdministration/ProxMox.md`. Read it before changing guests or storage. Frigate iGPU plan: `Frigate.md` § iGPU passthrough. **Do not start** later items (vzdump, iGPU) unless the user asks. `pve/store` / `/mnt/store` is **gone** (media on `/mnt/data`); do not recreate the LV.
+House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/SystemAdministration/ProxMox.md`.
+Read it before changing guests or storage.
+Frigate iGPU plan: `Frigate.md` § iGPU passthrough.
+**Do not start** later items (vzdump, iGPU) unless the user asks.
+`pve/store` / `/mnt/store` is **gone** (media on `/mnt/data`); do not recreate the LV.
 
 ## Connect
 
@@ -24,21 +34,30 @@ House facts (guests, USB, storage, later work): `~/Podval/dub.podval.org/notes/S
 ssh -o BatchMode=yes pve '…'
 ```
 
-YubiKey: `yk-tap` for `pve` (user rule). PVE has a full shell (`pvesh`, `qm`, `pct`, `pvesm`). Pull files here if you need to parse them.
+YubiKey: `yk-tap` for `pve` (user rule).
+PVE has a full shell (`pvesh`, `qm`, `pct`, `pvesm`).
+Pull files here if you need to parse them.
 
 Do not print cloudflared tunnel tokens, UniFi credentials, or Cloudflare API keys (`set -x` will leak them).
 
 ## Safety
 
-- **Never** `qm destroy` / `pct destroy`, wipe disks (`wipefs`, `mkfs`, `sgdisk`), or assemble leftover RAID unless the user asked. `md127` is **stopped** and ignored in `mdadm.conf`. Do not start it.
-- Do not stop **100 (haos)** or **101 (docker)** without an explicit ask. Both are `onboot: 1`.
-- Before editing a guest config: `cp -a /etc/pve/qemu-server/NNN.conf /root/NNN.conf.bak.$(date +%Y%m%d%H%M%S)` (LXC: `/etc/pve/lxc/NNN.conf`).
+- **Never** `qm destroy` / `pct destroy`, wipe disks (`wipefs`, `mkfs`, `sgdisk`), or assemble leftover RAID unless the
+  user asked.
+  `md127` is **stopped** and ignored in `mdadm.conf`.
+  Do not start it.
+- Do not stop **100 (haos)** or **101 (docker)** without an explicit ask.
+  Both are `onboot: 1`.
+- Before editing a guest config: `cp -a /etc/pve/qemu-server/NNN.conf /root/NNN.conf.bak.$(date +%Y%m%d%H%M%S)` (LXC:
+  `/etc/pve/lxc/NNN.conf`).
 - Do not run community-scripts installers unless the user asked.
 - Do not move USB devices off VM 100 (HA radios live there).
 - Prefer `pvesh` / `qm` / `pct` over hand-editing `/etc/pve` when a command exists.
-- **Never** attach virtiofs to VM 101 — it hangs UEFI boot. Frigate stays on NFS.
+- **Never** attach virtiofs to VM 101 — it hangs UEFI boot.
+  Frigate stays on NFS.
 - Do **not** restore `go run …@latest` on LXC 103 (`cloudflare-ddns`) — that filled the disk.
-- Do not recreate `pve/store` / `/mnt/store`. Filling a thin LV on `pve/data` can make the pool read-only and stall guests.
+- Do not recreate `pve/store` / `/mnt/store`.
+  Filling a thin LV on `pve/data` can make the pool read-only and stall guests.
 
 ## First move in a new session
 
